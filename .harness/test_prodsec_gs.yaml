@@ -27,13 +27,13 @@ pipeline:
                           #!/bin/bash
 
                           # Step 1: Install Python and Pip using microdnf
-                          echo "Installing Python and Pip using microdnf..."
-                          microdnf install -y python39 python39-pip git
-                          microdnf clean all
+                          # echo "Installing Python and Pip using microdnf..."
+                          # microdnf install -y python39 python39-pip git
+                          # microdnf clean all
 
                           # Step 2: Install Semgrep using pip
-                          echo "Installing Semgrep..."
-                          pip3 install semgrep
+                          # echo "Installing Semgrep..."
+                          # pip3 install semgrep
 
                           # Step 3: Verify Semgrep installation
                           echo "Verifying Semgrep installation..."

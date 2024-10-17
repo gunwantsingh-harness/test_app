@@ -128,11 +128,11 @@ pipeline:
 
                           # Step 9: Final summary with columns: org name, repo name, successfully cloned, successfully scanned, no. of issues
                           echo -e "\n\033[1;32mFinal Scan Summary:\033[0m"
-                          echo -e "Org Name\tRepo Name\tCloned\tScanned\tNo. of Issues"
+                          printf "%-20s %-20s %-10s %-10s %-15s\n" "Org Name" "Repo Name" "Cloned" "Scanned" "No. of Issues"
                           for repo in "${!repo_summaries[@]}"; do
                               summary="${repo_summaries[$repo]}"
                               IFS=',' read -r org_name repo_name cloned scanned issues <<< "$summary"
-                              echo -e "${org_name}\t${repo_name}\t${cloned}\t${scanned}\t\033[1;32m${issues}\033[0m"
+                              printf "%-20s %-20s %-10s %-10s \033[1;32m%-15s\033[0m\n" "$org_name" "$repo_name" "$cloned" "$scanned" "$issues"
                           done
                     environmentVariables: []
                     outputVariables: []

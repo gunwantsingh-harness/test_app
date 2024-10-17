@@ -28,7 +28,7 @@ pipeline:
 
                           # Step 1: Install Python and Pip using microdnf
                           echo "Installing Python and Pip using microdnf..."
-                          microdnf install -y python39 python39-pip git
+                          microdnf install -y python39 python39-pip git jq
                           microdnf clean all
 
                           # Step 2: Install Semgrep using pip
@@ -39,12 +39,12 @@ pipeline:
                           echo "Verifying Semgrep installation..."
                           semgrep --version
 
-                          # Step 1: Clone the repository containing the orgs_repos.txt file
+                          # Step 4: Clone the repository containing the orgs_repos.txt file
                           echo "Cloning the repository containing orgs_repos.txt..."
                           git clone https://github.com/gunwantsingh-harness/test_app.git
                           cd test_app || exit 1
 
-                          # Step 2: Read and parse the orgs_repos.txt file
+                          # Step 5: Read and parse the orgs_repos.txt file
                           declare -A orgs_and_repos
                           while IFS=: read -r org repos; do
                               # Skip empty lines or lines starting with #
@@ -58,10 +58,16 @@ pipeline:
                               orgs_and_repos["$org"]="$repos"
                           done < orgs_repos.txt
 
-                          # Step 3: Function to clone the default branch, print the default branch, run Semgrep, and print results summary
+                          # Step 6: Initialize variables for the summary
+                          declare -A repo_summaries
+
+                          # Step 7: Function to clone the default branch, print the default branch, run Semgrep, and print results summary
                           scan_repo() {
                               local org=$1
                               local repo=$2
+                              local cloned="NO"
+                              local scanned="NO"
+                              local issues_count=0
 
                               echo "Scanning repo: ${org}/${repo}"
 
@@ -69,8 +75,10 @@ pipeline:
                               git clone https://github.com/${org}/${repo}.git
                               if [ $? -ne 0 ]; then
                                   echo "Failed to clone repository ${org}/${repo}. Skipping."
-                                  return 1
+                                  repo_summaries["${org}/${repo}"]="${org},${repo},NO,NO,0"
+                                  return
                               fi
+                              cloned="YES"
 
                               cd ${repo} || exit 1
 
@@ -90,18 +98,13 @@ pipeline:
                               # Run Semgrep on the default branch and store results in SARIF format
                               result_file="../${repo}_results.sarif"
                               semgrep ci --config auto --sarif -o $result_file
+                              scanned="YES"
 
-                              # Print the SARIF results file path
-                              echo "Completed scanning ${repo}. Results stored in ${result_file}"
-
-                              # Print summary of the scan
+                              # Check the results
                               if [ -f "$result_file" ]; then
                                   issues_count=$(jq '.runs[0].results | length' $result_file)
                                   echo "Summary for ${repo}:"
                                   echo "Total issues found: $issues_count"
-                                  if [ "$issues_count" -gt 0 ]; then
-                                      jq -r '.runs[0].results[] | "Rule: \(.ruleId), Severity: \(.level), Message: \(.message.text)"' $result_file
-                                  fi
                               else
                                   echo "No results file generated for ${repo}"
                               fi
@@ -111,12 +114,11 @@ pipeline:
                               echo "Cleaning up cloned repo: ${repo}"
                               rm -rf ${repo}
 
-                              # List all the cloned repositories after each scan
-                              echo "Listing all cloned repositories and results:"
-                              ls
+                              # Record the summary for this repo
+                              repo_summaries["${org}/${repo}"]="${org},${repo},${cloned},${scanned},${issues_count}"
                           }
 
-                          # Step 4: Loop through each org and its repos
+                          # Step 8: Loop through each org and its repos
                           for org in "${!orgs_and_repos[@]}"; do
                               repos=${orgs_and_repos[$org]}
                               for repo in $repos; do
@@ -124,9 +126,14 @@ pipeline:
                               done
                           done
 
-                          # Step 5: List all repositories and their results
-                          echo "Final list of all repositories and Semgrep result files:"
-                          ls
+                          # Step 9: Final summary with columns: org name, repo name, successfully cloned, successfully scanned, no. of issues
+                          echo -e "\n\033[1;32mFinal Scan Summary:\033[0m"
+                          echo -e "Org Name\tRepo Name\tCloned\tScanned\tNo. of Issues"
+                          for repo in "${!repo_summaries[@]}"; do
+                              summary="${repo_summaries[$repo]}"
+                              IFS=',' read -r org_name repo_name cloned scanned issues <<< "$summary"
+                              echo -e "${org_name}\t${repo_name}\t${cloned}\t${scanned}\t\033[1;32m${issues}\033[0m"
+                          done
                     environmentVariables: []
                     outputVariables: []
                   timeout: 10m

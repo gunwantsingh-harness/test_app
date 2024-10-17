@@ -46,7 +46,7 @@ pipeline:
                               ["takipi"]="takipi-storage"
                           )
 
-                          # Step 5: Function to clone the default branch, print the default branch, run Semgrep, and store results
+                          # Step 5: Function to clone the default branch, print the default branch, run Semgrep, and print results summary
                           scan_repo() {
                               local org=$1
                               local repo=$2
@@ -70,15 +70,32 @@ pipeline:
                               # Checkout the default branch
                               git checkout $default_branch
 
-                              # Run Semgrep on the default branch
-                              semgrep ci --config auto --sarif -o ../${repo}_results.sarif
+                              # Run Semgrep on the default branch and store results in SARIF format
+                              result_file="../${repo}_results.sarif"
+                              semgrep ci --config auto --sarif -o $result_file
+
+                              # Print the SARIF results file path
+                              echo "Completed scanning ${repo}. Results stored in ${result_file}"
+
+                              # Print summary of the scan
+                              if [ -f "$result_file" ]; then
+                                  issues_count=$(jq '.runs[0].results | length' $result_file)
+                                  echo "Summary for ${repo}:"
+                                  echo "Total issues found: $issues_count"
+                                  if [ "$issues_count" -gt 0 ]; then
+                                      jq -r '.runs[0].results[] | "Rule: \(.ruleId), Severity: \(.level), Message: \(.message.text)"' $result_file
+                                  fi
+                              else
+                                  echo "No results file generated for ${repo}"
+                              fi
 
                               # Move back to the parent directory and clean up
                               cd ..
-                              echo "Completed scanning ${repo}. Results stored in ${repo}_results.sarif"
+                              echo "Cleaning up cloned repo: ${repo}"
+                              rm -rf ${repo}
 
                               # List all the cloned repositories after each scan
-                              echo "Listing all cloned repositories:"
+                              echo "Listing all cloned repositories and results:"
                               ls
                           }
 

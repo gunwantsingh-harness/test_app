@@ -109,34 +109,36 @@ pipeline:
                                   fi
                               else
                                   echo "No results file generated for ${repo}"
+                                  issues_count=0
                               fi
 
-                              # Move back to the parent directory and clean up
+                              # Return to parent directory
                               cd ..
-                              echo "Cleaning up cloned repo: ${repo}"
-                              rm -rf ${repo}
-
-                              # List all the cloned repositories after each scan
-                              echo "Listing all cloned repositories and results:"
-                              ls
+                              
+                              # Return the issue count
+                              echo "$issues_count"
                           }
 
-                          # Step 8: Track total results across all repositories
+                          # Step 8: Initialize counters
+                          declare -A repo_summaries
                           total_issues=0
 
                           # Step 9: Loop through each org and its repos
                           for org in "${!orgs_and_repos[@]}"; do
                               repos=${orgs_and_repos[$org]}
                               for repo in $repos; do
-                                  scan_repo $org $repo
-                                  repo_issues=$(jq '.runs[0].results | length' ../${repo}_results.sarif 2>/dev/null || echo 0)
+                                  repo_issues=$(scan_repo $org $repo)
                                   total_issues=$((total_issues + repo_issues))
+                                  repo_summaries["$org/$repo"]=$repo_issues
                               done
                           done
 
-                          # Step 10: Final summary of all repositories
+                          # Step 10: Final summary of all repositories and issues
                           echo -e "\033[1;32mFinal summary of all scanned repositories:\033[0m"
-                          echo "Total issues across all repositories: $total_issues"
+                          for repo in "${!repo_summaries[@]}"; do
+                              echo -e "\033[1;34m$repo: ${repo_summaries[$repo]} issues found\033[0m"
+                          done
+                          echo -e "\033[1;32mTotal issues across all repositories: $total_issues\033[0m"
                     environmentVariables: []
                     outputVariables: []
                   timeout: 10m

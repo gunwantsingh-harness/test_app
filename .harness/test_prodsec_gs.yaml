@@ -1,0 +1,89 @@
+pipeline:
+  name: test_prodsec_gs
+  identifier: test_prodsec_gs
+  projectIdentifier: Security_Test_Scans
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Semgrep Scan - Multiple repos
+        identifier: Semgrep_Scan_Multiple_repos
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: Semgrep_Scan
+                  identifier: Semgrep_Scan
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: |
+                          #!/bin/bash
+
+                          # Step 1: Install Python and Pip using microdnf
+                          echo "Installing Python and Pip using microdnf..."
+                          microdnf install -y python39 python39-pip git
+                          microdnf clean all
+
+                          # Step 2: Install Semgrep using pip
+                          echo "Installing Semgrep..."
+                          pip3 install semgrep
+
+                          # Step 3: Verify Semgrep installation
+                          echo "Verifying Semgrep installation..."
+                          semgrep --version
+
+                          # Step 4: Define an associative array of orgs and repos
+                          declare -A orgs_and_repos=(
+                              ["harness"]="gcp-lib ticket-service ff-gitsync"
+                              ["drone"]="drone-kaniko drone-plugin-index"
+                              ["takipi"]="takipi-storage"
+                          )
+
+                          # Step 5: Function to clone the default branch and run Semgrep
+                          scan_repo() {
+                              local org=$1
+                              local repo=$2
+
+                              echo "Scanning repo: ${org}/${repo}"
+
+                              # Clone the repository (assuming the default branch is used by default)
+                              git clone https://github.com/${org}/${repo}.git
+                              cd ${repo} || exit 1
+
+                              # Pull the latest changes from the default branch
+                              git checkout $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+
+                              # Run Semgrep on the default branch
+                              semgrep ci --config auto --sarif -o ../${repo}_results.sarif
+
+                              # Move back to the parent directory and clean up
+                              cd ..
+                              rm -rf ${repo}
+                              
+                              echo "Completed scanning ${repo}"
+                          }
+
+                          # Install Semgrep if not already installed
+                          # echo "Installing Semgrep..."
+                          # pip3 install semgrep
+
+                          # Step 6: Loop through each org and its repos
+                          for org in "${!orgs_and_repos[@]}"; do
+                              repos=${orgs_and_repos[$org]}
+                              for repo in $repos; do
+                                  scan_repo $org $repo
+                              done
+                          done
+
+                          echo "All repositories have been scanned."
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+        tags: {}

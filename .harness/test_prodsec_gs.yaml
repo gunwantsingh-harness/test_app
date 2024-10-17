@@ -26,6 +26,19 @@ pipeline:
                         script: |
                           #!/bin/bash
 
+                          # Step 1: Install Python and Pip using microdnf
+                          echo "Installing Python and Pip using microdnf..."
+                          microdnf install -y python39 python39-pip git
+                          microdnf clean all
+
+                          # Step 2: Install Semgrep using pip
+                          echo "Installing Semgrep..."
+                          pip3 install semgrep
+
+                          # Step 3: Verify Semgrep installation
+                          echo "Verifying Semgrep installation..."
+                          semgrep --version
+
                           # Step 1: Clone the repository containing the orgs_repos.txt file
                           echo "Cloning the repository containing orgs_repos.txt..."
                           git clone https://github.com/gunwantsingh-harness/test_app.git

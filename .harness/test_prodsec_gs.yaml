@@ -41,8 +41,8 @@ pipeline:
 
                           # Step 4: Define an associative array of orgs and repos
                           declare -A orgs_and_repos=(
-                              ["harness"]="gcp-lib ticket-service ff-gitsync"
-                              ["drone"]="drone-kaniko drone-plugin-index"
+                              ["harness"]="ff-proxy lite-engine"
+                              ["drone"]="drone-jira drone-plugin-index"
                               ["takipi"]="takipi-storage"
                           )
 

@@ -46,33 +46,41 @@ pipeline:
                               ["takipi"]="takipi-storage"
                           )
 
-                          # Step 5: Function to clone the default branch and run Semgrep
+                          # Step 5: Function to clone the default branch, print the default branch, run Semgrep, and store results
                           scan_repo() {
                               local org=$1
                               local repo=$2
 
                               echo "Scanning repo: ${org}/${repo}"
 
-                              # Clone the repository (assuming the default branch is used by default)
+                              # Clone the repository
                               git clone https://github.com/${org}/${repo}.git
                               cd ${repo} || exit 1
 
-                              # Pull the latest changes from the default branch
-                              git checkout $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+                              # List contents of the cloned repo
+                              echo "Contents of ${repo}:"
+                              ls
+
+                              # Fetch the default branch
+                              default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+
+                              # Print the default branch
+                              echo "Default branch for ${repo} is ${default_branch}"
+
+                              # Checkout the default branch
+                              git checkout $default_branch
 
                               # Run Semgrep on the default branch
                               semgrep ci --config auto --sarif -o ../${repo}_results.sarif
 
                               # Move back to the parent directory and clean up
                               cd ..
-                              rm -rf ${repo}
-                              
-                              echo "Completed scanning ${repo}"
-                          }
+                              echo "Completed scanning ${repo}. Results stored in ${repo}_results.sarif"
 
-                          # Install Semgrep if not already installed
-                          # echo "Installing Semgrep..."
-                          # pip3 install semgrep
+                              # List all the cloned repositories after each scan
+                              echo "Listing all cloned repositories:"
+                              ls
+                          }
 
                           # Step 6: Loop through each org and its repos
                           for org in "${!orgs_and_repos[@]}"; do
@@ -82,7 +90,9 @@ pipeline:
                               done
                           done
 
-                          echo "All repositories have been scanned."
+                          # Step 7: List all repositories and their results
+                          echo "Final list of all repositories and Semgrep result files:"
+                          ls
                     environmentVariables: []
                     outputVariables: []
                   timeout: 10m

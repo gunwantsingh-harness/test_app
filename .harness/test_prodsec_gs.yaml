@@ -142,11 +142,11 @@ pipeline:
                     outputVariables: []
                   when:
                     stageStatus: Success
-                    condition: ${pipeline.variables.SKIP_TESTS} == 'false'
+                    condition: <+OnStageSuccess> && <+pipeline.variables.SKIP_TESTS> == 'true'
                     environmentVariables:
                       - name: skipTests
                         type: String
-                        value: "false"
+                        value: "true"
                     outputVariables: []
                   timeout: 10m
         tags: {}

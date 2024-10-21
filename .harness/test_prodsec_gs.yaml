@@ -36,10 +36,12 @@ pipeline:
                       type: Inline
                       spec:
                         script: |
-                          # Step 1: Install Python and pip (if needed) and Semgrep
-                          echo "Installing Python, pip, and Semgrep..."
-                          python3 --version || apt-get update && apt-get install -y python3
-                          pip3 --version || apt-get install -y python3-pip
+                          # Step 1: Install Python, pip, and Semgrep using microdnf
+                          echo "Installing Python, pip, and Semgrep using microdnf..."
+                          microdnf install -y python39 python39-pip git jq
+                          microdnf clean all
+
+                          # Install Semgrep
                           pip3 install semgrep
 
                           # Verify Semgrep installation

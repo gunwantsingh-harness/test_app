@@ -18,146 +18,72 @@ pipeline:
           execution:
             steps:
               - step:
-                  type: ShellScript
-                  name: Semgrep_Scan
-                  identifier: Semgrep_Scan
-                  spec:
-                    shell: Bash
-                    source:
-                      type: Inline
-                      spec:
-                        script: |
-                          #!/bin/bash
-                          # Step 1: Install Python and Pip using microdnf
-                          echo "Installing Python and Pip using microdnf..."
-                          microdnf install -y python39 python39-pip git jq
-                          microdnf clean all
-
-                          echo "Installing Semgrep..."
-                          pip3 install semgrep
-
-                          echo "Verifying Semgrep installation..."
-                          semgrep --version
-
-                          git clone https://github.com/gunwantsingh-harness/test_app.git
-                          cd test_app || exit 1
-
-                          declare -A orgs_and_repos
-                          while IFS=: read -r org repos; do
-                              [[ -z "$org" || "$org" =~ ^# ]] && continue
-                              org=$(echo "$org" | xargs)
-                              repos=$(echo "$repos" | xargs | sed 's/,/ /g')
-                              orgs_and_repos["$org"]="$repos"
-                          done < orgs_repos.txt
-
-                          declare -A repo_summaries
-                          scan_repo() {
-                              local org=$1
-                              local repo=$2
-                              local cloned="NO"
-                              local scanned="NO"
-                              local issues_count=0
-                              echo "Scanning repo: ${org}/${repo}"
-                              git clone https://github.com/${org}/${repo}.git
-                              if [ $? -ne 0 ]; then
-                                  echo "Failed to clone repository ${org}/${repo}. Skipping."
-                                  repo_summaries["${org}/${repo}"]="${org},${repo},NO,NO,0"
-                                  return
-                              fi
-                              cloned="YES"
-                              cd ${repo} || exit 1
-                              default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-                              echo "Default branch for ${repo} is ${default_branch}"
-                              git checkout $default_branch
-                              result_file="../${repo}_results.sarif"
-                              semgrep ci --config auto --sarif -o $result_file
-                              scanned="YES"
-                              if [ -f "$result_file" ]; then
-                                  issues_count=$(jq '.runs[0].results | length' $result_file)
-                                  echo "Total issues found: $issues_count"
-                              else
-                                  echo "No results file generated for ${repo}"
-                              fi
-                              cd ..
-                              rm -rf ${repo}
-                              repo_summaries["${org}/${repo}"]="${org},${repo},${cloned},${scanned},${issues_count}"
-                          }
-
-                          for org in "${!orgs_and_repos[@]}"; do
-                              repos=${orgs_and_repos[$org]}
-                              for repo in $repos; do
-                                  scan_repo $org $repo
-                              done
-                          done
-
-                          echo -e "\n\033[1;32mFinal Scan Summary:\033[0m"
-                          printf "%-20s %-20s %-10s %-10s %-15s\n" "Org Name" "Repo Name" "Cloned" "Scanned" "No. of Issues"
-                          for repo in "${!repo_summaries[@]}"; do
-                              summary="${repo_summaries[$repo]}"
-                              IFS=',' read -r org_name repo_name cloned scanned issues <<< "$summary"
-                              printf "%-20s %-20s %-10s %-10s \033[1;32m%-15s\033[0m\n" "$org_name" "$repo_name" "$cloned" "$scanned" "$issues"
-                    failureStrategies:
-                      - onFailure:
-                          errors:
-                            - AllErrors
-                          action:
-                            type: Retry
-                            spec:
-                              retryCount: 2
-              - step:
-                  name: Scan Repositories
-                  identifier: Scan_repos
+                  name: Scan Repositories by Organization
+                  identifier: Scan_repos_by_org
                   type: ShellScript
                   strategy:
                     matrix:
-                      include:
-                        - organization: org1
-                          repository: repo1
-                        - organization: org1
-                          repository: repo2
-                        - organization: org2
-                          repository: repo3
-                        - organization: org2
-                          repository: repo4
-                        - organization: org3
-                          repository: repo5
+                      organization:
+                        - name: org1
+                          repositories:
+                            - repo1
+                            - repo2
+                        - name: org2
+                          repositories:
+                            - repo3
+                            - repo4
+                        - name: org3
+                          repositories:
+                            - repo5
+                            - repo6
                   spec:
                     shell: Bash
                     source:
                       type: Inline
                       spec:
                         script: |
-                          echo "Cloning and scanning repository for org: ${organization}, repo: ${repository}"
+                          echo "Processing organization: ${organization.name}"
 
-                          git clone https://github.com/${organization}/${repository}.git
-                          if [ $? -ne 0 ]; then
-                              echo "Failed to clone repository ${organization}/${repository}. Skipping."
-                              exit 1
-                          fi
-                          cd ${repository} || exit 1
+                          # Loop over the repositories within the organization
+                          for repo in "${organization.repositories[@]}"; do
+                            echo "Cloning and scanning repository: ${organization.name}/${repo}"
 
-                          default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-                          echo "Default branch for ${repository} is ${default_branch}"
-                          git checkout $default_branch
-                          result_file="../${repository}_results.sarif"
-                          semgrep ci --config auto --sarif -o $result_file
+                            git clone https://github.com/${organization.name}/${repo}.git
+                            if [ $? -ne 0 ]; then
+                                echo "Failed to clone repository ${organization.name}/${repo}. Skipping."
+                                continue
+                            fi
 
-                          if [ -f "$result_file" ]; then
-                              issues_count=$(jq '.runs[0].results | length' $result_file)
-                              echo "Total issues found in ${repository}: $issues_count"
-                          else
-                              echo "No results file generated for ${repository}"
-                          fi
-                          cd ..
-                          rm -rf ${repository}
+                            cd ${repo} || exit 1
+
+                            # Fetch the default branch
+                            default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+                            echo "Default branch for ${repo} is ${default_branch}"
+
+                            git checkout $default_branch
+
+                            # Run Semgrep on the default branch
+                            result_file="../${repo}_results.sarif"
+                            semgrep ci --config auto --sarif -o $result_file
+
+                            # Check if the results file was created
+                            if [ -f "$result_file" ]; then
+                                issues_count=$(jq '.runs[0].results | length' $result_file)
+                                echo "Total issues found in ${repo}: $issues_count"
+                            else
+                                echo "No results file generated for ${repo}"
+                            fi
+
+                            # Cleanup
+                            cd ..
+                            rm -rf ${repo}
+                          done
                     failureStrategies:
                       - onFailure:
                           errors:
                             - AllErrors
                           action:
-                            type: Retry
-                            spec:
-                              retryCount: 2
+                            type: MarkAsFailure
         failureStrategies:
           - onFailure:
               errors:

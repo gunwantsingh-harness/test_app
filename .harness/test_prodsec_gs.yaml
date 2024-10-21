@@ -31,23 +31,23 @@ pipeline:
                         - organization: harness
                           repository: ffproxy
                           target_name: ffproxy
-                          repo_url: https://github.com/gunwantsingh-harness/harness/ffproxy
+                          repo_url: https://github.com/harness/ffproxy
                         - organization: harness
                           repository: lite-engine
                           target_name: lite-engine
-                          repo_url: https://github.com/gunwantsingh-harness/harness/lite-engine
+                          repo_url: https://github.com/harness/lite-engine
                         - organization: drone
                           repository: drone-jira
                           target_name: drone-jira
-                          repo_url: https://github.com/gunwantsingh-harness/drone/drone-jira
+                          repo_url: https://github.com/drone/drone-jira
                         - organization: drone
                           repository: drone-plugin-index
                           target_name: drone-plugin-index
-                          repo_url: https://github.com/gunwantsingh-harness/drone/drone-plugin-index
+                          repo_url: https://github.com/drone/drone-plugin-index
                         - organization: takipi
                           repository: takipi-storage
                           target_name: takipi-storage
-                          repo_url: https://github.com/gunwantsingh-harness/takipi/takipi-storage
+                          repo_url: https://github.com/takipi/takipi-storage
                   spec:
                     mode: orchestration
                     config: default

@@ -3,12 +3,10 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
-  tags: {}
   stages:
     - stage:
         name: Semgrep Scan - Multiple Repos
         identifier: Semgrep_Scan_Multiple_Repos
-        description: Scanning multiple repositories using Semgrep
         type: SecurityTests
         spec:
           cloneCodebase: false
@@ -26,7 +24,7 @@ pipeline:
                   identifier: Semgrep_Scan
                   strategy:
                     matrix:
-                      maxConcurrency: 3
+                      maxConcurrency: 2
                       include:
                         - organization: harness
                           repository: ffproxy

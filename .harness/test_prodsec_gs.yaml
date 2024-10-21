@@ -3,10 +3,12 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
+  tags: {}
   stages:
     - stage:
         name: Semgrep Scan - Multiple Repos
         identifier: Semgrep_Scan_Multiple_Repos
+        description: Scanning multiple repositories using Semgrep
         type: SecurityTests
         spec:
           cloneCodebase: false
@@ -52,7 +54,7 @@ pipeline:
                       log:
                         level: info
                     repository:
-                      connectorRef: github_connector_ref
+                      connectorRef: test_GS_apphio
                       repo: <+matrix.organization>/<+matrix.repository>
                       branch: ""
                     reportName: Semgrep_Scan_Report

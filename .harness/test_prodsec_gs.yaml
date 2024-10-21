@@ -10,17 +10,28 @@ pipeline:
   tags: {}
   stages:
     - stage:
-        name: Semgrep Scan - Multiple repos
+        name: Semgrep Scan - Multiple Repos
         identifier: Semgrep_Scan_Multiple_repos
         description: ""
-        type: Custom
+        type: SecurityTests
         spec:
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: <K8S_CONNECTOR_REF>
+              namespace: default
+              resources:
+                limits:
+                  memory: 2048Mi
+                  cpu: 1000m
           execution:
             steps:
               - step:
-                  name: Install Dependencies and Scan Repositories
-                  identifier: Install_and_Scan
-                  type: ShellScript
+                  name: Semgrep Scan
+                  identifier: Semgrep_Scan
+                  type: Security
+                  tool:
+                    type: Semgrep
                   strategy:
                     matrix:
                       maxConcurrency: 2
@@ -32,71 +43,31 @@ pipeline:
                         - name: takipi
                           repositories: takipi-storage
                   spec:
-                    shell: Bash
+                    mode: orchestrated
+                    config:
+                      policy_type: Default
+                      policy_config:
+                        scan_type: full
                     source:
-                      type: Inline
+                      type: Git
                       spec:
-                        script: |
-                          # Step 1: Install Python, pip, and Semgrep using microdnf
-                          echo "Installing Python, pip, and Semgrep using microdnf..."
-                          microdnf install -y python39 python39-pip git jq
-                          microdnf clean all
-
-                          # Install Semgrep
-                          pip3 install semgrep
-
-                          # Verify Semgrep installation
-                          semgrep --version || { echo "Semgrep installation failed"; exit 1; }
-
-                          echo "Processing organization: <+matrix.organization.name>"
-
-                          # Step 2: Split the space-separated repositories string into an array
-                          IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
-
-                          # Step 3: Loop over the repositories within the organization
-                          for repo in "${repos_array[@]}"; do
-                            echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"
-
-                            git clone https://github.com/<+matrix.organization.name>/${repo}.git
-                            if [ $? -ne 0 ]; then
-                                echo "Failed to clone repository <+matrix.organization.name>/${repo}. Skipping."
-                                continue
-                            fi
-
-                            cd ${repo} || exit 1
-
-                            # Fetch the default branch
-                            default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-                            echo "Default branch for ${repo} is ${default_branch}"
-
-                            git checkout $default_branch
-
-                            # Step 4: Run Semgrep on the default branch
-                            result_file="../${repo}_results.sarif"
-                            semgrep ci --config auto --sarif -o $result_file
-
-                            # Step 5: Check if the results file was created
-                            if [ -f "$result_file" ]; then
-                                issues_count=$(jq '.runs[0].results | length' $result_file)
-                                echo "Total issues found in ${repo}: $issues_count"
-                            else
-                                echo "No results file generated for ${repo}"
-                            fi
-
-                            # Cleanup
-                            cd ..
-                            rm -rf ${repo}
-                          done
-                    failureStrategies:
-                      - onFailure:
-                          errors:
-                            - AllErrors
-                          action:
-                            type: MarkAsFailure
-                    executionTarget: {}
-                    environmentVariables: []
-                    outputVariables: []
-                  timeout: 10m
+                        connectorRef: <GIT_CONNECTOR_REF>
+                        repoName: <+matrix.organization>/<+matrix.repository>
+                        branch: main
+                    advanced:
+                      output_format: sarif
+                    security:
+                      severity:
+                        - critical
+                        - high
+                        - medium
+                        - low
+                    envVariables:
+                      - name: GITHUB_TOKEN
+                        type: Secret
+                        value: <YOUR_GITHUB_TOKEN>
+                    reportName: Semgrep_Scan_Report
+                timeout: 10m
         failureStrategies:
           - onFailure:
               errors:

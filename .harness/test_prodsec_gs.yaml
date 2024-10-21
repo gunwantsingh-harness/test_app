@@ -1,37 +1,35 @@
 pipeline:
-  name: test_prodsec_gs
+  name: semgrep-orch-test
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
-  variables:
-    - name: SKIP_TESTS
-      type: String
-      value: "true"
   tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_GS
+        build: <+input>
   stages:
     - stage:
-        name: Semgrep Scan - Multiple Repos
-        identifier: Semgrep_Scan_Multiple_repos
+        name: semgrep-orch
+        identifier: semgreporch
         description: ""
         type: SecurityTests
         spec:
-          infrastructure:
-            type: KubernetesDirect
-            spec:
-              connectorRef: <K8S_CONNECTOR_REF>
-              namespace: default
-              resources:
-                limits:
-                  memory: 2048Mi
-                  cpu: 1000m
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
           execution:
             steps:
               - step:
-                  name: Semgrep Scan
-                  identifier: Semgrep_Scan
-                  type: Security
-                  tool:
-                    type: Semgrep
+                  type: Semgrep
+                  name: Semgrep_1
+                  identifier: Semgrep_1
                   strategy:
                     matrix:
                       maxConcurrency: 2
@@ -43,35 +41,11 @@ pipeline:
                         - name: takipi
                           repositories: takipi-storage
                   spec:
-                    mode: orchestrated
-                    config:
-                      policy_type: Default
-                      policy_config:
-                        scan_type: full
-                    source:
-                      type: Git
-                      spec:
-                        connectorRef: <GIT_CONNECTOR_REF>
-                        repoName: <+matrix.organization>/<+matrix.repository>
-                        branch: main
+                    mode: orchestration
+                    config: default
+                    target:
+                      type: repository
+                      detection: auto
                     advanced:
-                      output_format: sarif
-                    security:
-                      severity:
-                        - critical
-                        - high
-                        - medium
-                        - low
-                    envVariables:
-                      - name: GITHUB_TOKEN
-                        type: Secret
-                        value: <YOUR_GITHUB_TOKEN>
-                    reportName: Semgrep_Scan_Report
-                timeout: 10m
-        failureStrategies:
-          - onFailure:
-              errors:
-                - AllErrors
-              action:
-                type: MarkAsFailure
-        tags: {}
+                      log:
+                        level: info

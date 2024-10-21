@@ -24,18 +24,17 @@ pipeline:
                   strategy:
                     matrix:
                       organization:
-                        - name: org1
+                        - name: harness
                           repositories:
-                            - repo1
-                            - repo2
-                        - name: org2
+                            - ffproxy
+                            - lite-engine
+                        - name: drone
                           repositories:
-                            - repo3
-                            - repo4
-                        - name: org3
+                            - drone-jira
+                            - drone-plugin-index
+                        - name: takipi
                           repositories:
-                            - repo5
-                            - repo6
+                            - takipi-storage
                   spec:
                     shell: Bash
                     source:
@@ -84,6 +83,10 @@ pipeline:
                             - AllErrors
                           action:
                             type: MarkAsFailure
+                    executionTarget: {}
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
         failureStrategies:
           - onFailure:
               errors:

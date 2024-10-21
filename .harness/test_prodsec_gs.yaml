@@ -145,4 +145,18 @@ pipeline:
                     condition: <+OnStageSuccess> && <+pipeline.variables.SKIP_TESTS> == 'false'
                     outputVariables: []
                   timeout: 10m
+              - step:
+                  type: ShellScript
+                  name: ShellScript_2
+                  identifier: ShellScript_2
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: ls
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
         tags: {}

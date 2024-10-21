@@ -11,6 +11,7 @@ pipeline:
         description: ""
         type: SecurityTests
         spec:
+          cloneCodebase: false
           platform:
             os: Linux
             arch: Amd64

@@ -4,20 +4,14 @@ pipeline:
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
   tags: {}
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: test_GS
-        build: <+input>
   stages:
     - stage:
-        name: semgrep-orch
-        identifier: semgreporch
-        description: ""
+        name: Semgrep Scan - Multiple Repos
+        identifier: semgrep_scan_multiple_repos
+        description: Scanning multiple repositories using Semgrep
         type: SecurityTests
         spec:
-          cloneCodebase: true
+          cloneCodebase: false
           platform:
             os: Linux
             arch: Amd64
@@ -28,24 +22,49 @@ pipeline:
             steps:
               - step:
                   type: Semgrep
-                  name: Semgrep_1
-                  identifier: Semgrep_1
+                  name: Semgrep_Scan
+                  identifier: Semgrep_Scan
                   strategy:
                     matrix:
                       maxConcurrency: 2
-                      organization:
-                        - name: harness
-                          repositories: ffproxy lite-engine
-                        - name: drone
-                          repositories: drone-jira drone-plugin-index
-                        - name: takipi
-                          repositories: takipi-storage
+                      include:
+                        - organization: harness
+                          repository: ffproxy
+                          repo_url: https://github.com/gunwantsingh-harness/harness/ffproxy
+                        - organization: harness
+                          repository: lite-engine
+                          repo_url: https://github.com/gunwantsingh-harness/harness/lite-engine
+                        - organization: drone
+                          repository: drone-jira
+                          repo_url: https://github.com/gunwantsingh-harness/drone/drone-jira
+                        - organization: drone
+                          repository: drone-plugin-index
+                          repo_url: https://github.com/gunwantsingh-harness/drone/drone-plugin-index
+                        - organization: takipi
+                          repository: takipi-storage
+                          repo_url: https://github.com/gunwantsingh-harness/takipi/takipi-storage
                   spec:
                     mode: orchestration
                     config: default
                     target:
                       type: repository
                       detection: auto
+                      target_name: <+matrix.repo_url>
                     advanced:
                       log:
                         level: info
+                    repository:
+                      connectorRef: test_app_apphio
+                      repo: <+matrix.repo_url>
+                      branch: ""
+                    reportName: Semgrep_Scan_Report
+          reports:
+            formats:
+              - type: sarif
+            upload: true
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: MarkAsFailure

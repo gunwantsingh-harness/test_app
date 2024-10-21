@@ -56,10 +56,3 @@ pipeline:
             formats:
               - type: sarif
             upload: true
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: test_GS
-        build: <+input>
-        sparseCheckout: []

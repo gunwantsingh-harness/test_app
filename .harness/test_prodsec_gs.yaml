@@ -1,21 +1,23 @@
 pipeline:
-  name: test_prodsec_gs
+  name: semgrep-orch-test
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
-  variables:
-    - name: SKIP_TESTS
-      type: String
-      value: "true"
   tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_GS
+        build: <+input>
   stages:
     - stage:
-        name: Semgrep Scan - Multiple Repos
-        identifier: Semgrep_Scan_Multiple_Repos
-        description: Scan multiple repositories using STO and Semgrep
+        name: semgrep-orch
+        identifier: semgreporch
+        description: ""
         type: SecurityTests
         spec:
-          cloneCodebase: false
+          cloneCodebase: true
           platform:
             os: Linux
             arch: Amd64
@@ -26,49 +28,24 @@ pipeline:
             steps:
               - step:
                   type: Semgrep
-                  name: Semgrep_Scan
-                  identifier: Semgrep_Scan
+                  name: Semgrep_1
+                  identifier: Semgrep_1
                   strategy:
                     matrix:
                       maxConcurrency: 2
-                      include:
-                        - organization: harness
-                          repository: ffproxy
-                          target_name: harness/ffproxy
-                        - organization: harness
-                          repository: lite-engine
-                          target_name: harness/lite-engine
-                        - organization: drone
-                          repository: drone-jira
-                          target_name: drone/drone-jira
-                        - organization: drone
-                          repository: drone-plugin-index
-                          target_name: drone/drone-plugin-index
-                        - organization: takipi
-                          repository: takipi-storage
-                          target_name: takipi/takipi-storage
+                      organization:
+                        - name: harness
+                          repositories: ffproxy lite-engine
+                        - name: drone
+                          repositories: drone-jira drone-plugin-index
+                        - name: takipi
+                          repositories: takipi-storage
                   spec:
                     mode: orchestration
                     config: default
                     target:
                       type: repository
                       detection: auto
-                      target_name: <+matrix.target_name>
                     advanced:
                       log:
                         level: info
-                    repository:
-                      connectorRef: test_GS_apphio
-                      repo: <+matrix.organization>/<+matrix.repository>
-                      branch: ""
-                    reportName: Semgrep_Scan_Report
-          reports:
-            formats:
-              - type: sarif
-            upload: true
-        failureStrategies:
-          - onFailure:
-              errors:
-                - AllErrors
-              action:
-                type: MarkAsFailure

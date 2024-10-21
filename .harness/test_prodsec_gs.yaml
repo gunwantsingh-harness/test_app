@@ -25,16 +25,11 @@ pipeline:
                     matrix:
                       organization:
                         - name: harness
-                          repositories:
-                            - ffproxy
-                            - lite-engine
+                          repositories: ffproxy lite-engine
                         - name: drone
-                          repositories:
-                            - drone-jira
-                            - drone-plugin-index
+                          repositories: drone-jira drone-plugin-index
                         - name: takipi
-                          repositories:
-                            - takipi-storage
+                          repositories: takipi-storage
                   spec:
                     shell: Bash
                     source:
@@ -43,8 +38,11 @@ pipeline:
                         script: |
                           echo "Processing organization: ${organization.name}"
 
+                          # Split the space-separated repositories string into an array
+                          IFS=' ' read -r -a repos_array <<< "${organization.repositories}"
+
                           # Loop over the repositories within the organization
-                          for repo in "${organization.repositories[@]}"; do
+                          for repo in "${repos_array[@]}"; do
                             echo "Cloning and scanning repository: ${organization.name}/${repo}"
 
                             git clone https://github.com/${organization.name}/${repo}.git
@@ -83,10 +81,6 @@ pipeline:
                             - AllErrors
                           action:
                             type: MarkAsFailure
-                    executionTarget: {}
-                    environmentVariables: []
-                    outputVariables: []
-                  timeout: 10m
         failureStrategies:
           - onFailure:
               errors:

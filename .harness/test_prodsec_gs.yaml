@@ -54,7 +54,7 @@ pipeline:
                       log:
                         level: info
                     repository:
-                      connectorRef: test_GS_apphio
+                      connectorRef: github_connector_ref
                       repo: <+matrix.organization>/<+matrix.repository>
                       branch: ""
                     reportName: Semgrep_Scan_Report

@@ -49,3 +49,8 @@ pipeline:
                     advanced:
                       log:
                         level: info
+                    reportName: Semgrep_Scan_Report
+          reports:
+            formats:
+              - type: sarif
+            upload: true

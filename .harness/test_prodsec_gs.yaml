@@ -36,18 +36,18 @@ pipeline:
                       type: Inline
                       spec:
                         script: |
-                          echo "Processing organization: ${organization.name}"
+                          echo "Processing organization: <+matrix.organization.name>"
 
                           # Split the space-separated repositories string into an array
-                          IFS=' ' read -r -a repos_array <<< "${organization.repositories}"
+                          IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
 
                           # Loop over the repositories within the organization
                           for repo in "${repos_array[@]}"; do
-                            echo "Cloning and scanning repository: ${organization.name}/${repo}"
+                            echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"
 
-                            git clone https://github.com/${organization.name}/${repo}.git
+                            git clone https://github.com/<+matrix.organization.name>/${repo}.git
                             if [ $? -ne 0 ]; then
-                                echo "Failed to clone repository ${organization.name}/${repo}. Skipping."
+                                echo "Failed to clone repository <+matrix.organization.name>/${repo}. Skipping."
                                 continue
                             fi
 

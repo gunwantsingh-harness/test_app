@@ -52,7 +52,7 @@ pipeline:
                     repository:
                       connectorRef: github_connector_ref
                       repo: <+matrix.organization.name>/<+matrix.repository>
-                      branch: ""
+                      branch: <+codebase.defaultBranch>
                     reportName: Semgrep_Scan_Report
           reports:
             formats:

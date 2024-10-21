@@ -23,6 +23,7 @@ pipeline:
                   type: ShellScript
                   strategy:
                     matrix:
+                      maxConcurrency: 2
                       organization:
                         - name: harness
                           repositories: ffproxy lite-engine
@@ -92,6 +93,10 @@ pipeline:
                             - AllErrors
                           action:
                             type: MarkAsFailure
+                    executionTarget: {}
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
         failureStrategies:
           - onFailure:
               errors:

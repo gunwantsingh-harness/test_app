@@ -138,6 +138,8 @@ pipeline:
                               IFS=',' read -r org_name repo_name cloned scanned issues <<< "$summary"
                               printf "%-20s %-20s %-10s %-10s \033[1;32m%-15s\033[0m\n" "$org_name" "$repo_name" "$cloned" "$scanned" "$issues"
                           done
+                    environmentVariables: []
+                    outputVariables: []
                   when:
                     stageStatus: Success
                     condition: ${pipeline.variables.SKIP_TESTS} == 'false'

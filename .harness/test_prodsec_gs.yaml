@@ -18,8 +18,8 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Scan Repositories by Organization
-                  identifier: Scan_repos_by_org
+                  name: Install Dependencies and Scan Repositories
+                  identifier: Install_and_Scan
                   type: ShellScript
                   strategy:
                     matrix:
@@ -36,12 +36,21 @@ pipeline:
                       type: Inline
                       spec:
                         script: |
+                          # Step 1: Install Python and pip (if needed) and Semgrep
+                          echo "Installing Python, pip, and Semgrep..."
+                          python3 --version || apt-get update && apt-get install -y python3
+                          pip3 --version || apt-get install -y python3-pip
+                          pip3 install semgrep
+
+                          # Verify Semgrep installation
+                          semgrep --version || { echo "Semgrep installation failed"; exit 1; }
+
                           echo "Processing organization: <+matrix.organization.name>"
 
-                          # Split the space-separated repositories string into an array
+                          # Step 2: Split the space-separated repositories string into an array
                           IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
 
-                          # Loop over the repositories within the organization
+                          # Step 3: Loop over the repositories within the organization
                           for repo in "${repos_array[@]}"; do
                             echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"
 
@@ -59,11 +68,11 @@ pipeline:
 
                             git checkout $default_branch
 
-                            # Run Semgrep on the default branch
+                            # Step 4: Run Semgrep on the default branch
                             result_file="../${repo}_results.sarif"
                             semgrep ci --config auto --sarif -o $result_file
 
-                            # Check if the results file was created
+                            # Step 5: Check if the results file was created
                             if [ -f "$result_file" ]; then
                                 issues_count=$(jq '.runs[0].results | length' $result_file)
                                 echo "Total issues found in ${repo}: $issues_count"

@@ -12,9 +12,9 @@ pipeline:
         build: <+input>
   stages:
     - stage:
-        name: Semgrep Scan
-        identifier: semgreporch
-        description: Executing Semgrep scans across multiple repositories
+        name: Semgrep Scan - Multiple Repositories
+        identifier: semgrep_scan_stage
+        description: Scanning multiple organizations and repositories using Semgrep
         type: SecurityTests
         spec:
           cloneCodebase: true
@@ -35,16 +35,15 @@ pipeline:
                       maxConcurrency: 2
                       include:
                         - organization: harness
-                          repositories:
-                            - ffproxy
-                            - lite-engine
+                          repository: ffproxy
+                        - organization: harness
+                          repository: lite-engine
                         - organization: drone
-                          repositories:
-                            - drone-jira
-                            - drone-plugin-index
+                          repository: drone-jira
+                        - organization: drone
+                          repository: drone-plugin-index
                         - organization: takipi
-                          repositories:
-                            - takipi-storage
+                          repository: takipi-storage
                   spec:
                     mode: orchestration
                     config: default

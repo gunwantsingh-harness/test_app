@@ -6,9 +6,9 @@ pipeline:
   tags: {}
   stages:
     - stage:
-        name: Semgrep Scan - Multiple Repos
-        identifier: semgrep_scan_multiple_repos
-        description: Scanning multiple repositories using Semgrep
+        name: Semgrep Scan - Single Repo
+        identifier: semgrep_scan_single_repo
+        description: Scanning a single repository using Semgrep
         type: SecurityTests
         spec:
           cloneCodebase: false
@@ -26,28 +26,11 @@ pipeline:
                   identifier: Semgrep_Scan
                   strategy:
                     matrix:
-                      maxConcurrency: 2
                       include:
-                        - organization: harness
-                          repository: ffproxy
-                          target_name: ffproxy
-                          repo_url: https://github.com/harness/ffproxy
-                        - organization: harness
-                          repository: lite-engine
-                          target_name: lite-engine
-                          repo_url: https://github.com/harness/lite-engine
-                        - organization: drone
-                          repository: drone-jira
-                          target_name: drone-jira
-                          repo_url: https://github.com/drone/drone-jira
-                        - organization: drone
-                          repository: drone-plugin-index
-                          target_name: drone-plugin-index
-                          repo_url: https://github.com/drone/drone-plugin-index
                         - organization: takipi
                           repository: takipi-storage
-                          target_name: takipi-storage
                           repo_url: https://github.com/takipi/takipi-storage
+                          target_name: takipi-storage
                   spec:
                     mode: orchestration
                     config: default

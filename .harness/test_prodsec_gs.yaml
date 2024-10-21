@@ -3,6 +3,10 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
+  variables:
+    - name: SKIP_TESTS
+      type: String
+      value: "false"
   tags: {}
   stages:
     - stage:
@@ -134,6 +138,9 @@ pipeline:
                               IFS=',' read -r org_name repo_name cloned scanned issues <<< "$summary"
                               printf "%-20s %-20s %-10s %-10s \033[1;32m%-15s\033[0m\n" "$org_name" "$repo_name" "$cloned" "$scanned" "$issues"
                           done
+                  when:
+                    stageStatus: Success
+                    condition: ${pipeline.variables.SKIP_TESTS} == 'false'
                     environmentVariables:
                       - name: skipTests
                         type: String

@@ -34,21 +34,26 @@ pipeline:
                       include:
                         - organization: harness
                           repository: ffproxy
+                          target_name: harness/ffproxy
                         - organization: harness
                           repository: lite-engine
+                          target_name: harness/lite-engine
                         - organization: drone
                           repository: drone-jira
+                          target_name: drone/drone-jira
                         - organization: drone
                           repository: drone-plugin-index
+                          target_name: drone/drone-plugin-index
                         - organization: takipi
                           repository: takipi-storage
+                          target_name: takipi/takipi-storage
                   spec:
                     mode: orchestration
                     config: default
                     target:
                       type: repository
                       detection: auto
-                      target_name: <+matrix.organization>/<+matrix.repository>
+                      target_name: <+matrix.target_name>
                     advanced:
                       log:
                         level: info

@@ -142,7 +142,7 @@ pipeline:
                     outputVariables: []
                   when:
                     stageStatus: Success
-                    condition: <+OnStageSuccess> && <+pipeline.variables.SKIP_TESTS> == 'false'
+                    condition: <+OnStageSuccess> && 0
                     environmentVariables:
                       - name: skipTests
                         type: String

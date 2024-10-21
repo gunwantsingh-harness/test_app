@@ -1,5 +1,5 @@
 pipeline:
-  name: semgrep-single-repo-scan
+  name: semgrep-no-clone-scan
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
@@ -14,10 +14,10 @@ pipeline:
     - stage:
         name: Semgrep Scan
         identifier: semgrep_scan_stage
-        description: Scanning a single repository using Semgrep
+        description: Scanning a single repository using Semgrep without cloning
         type: SecurityTests
         spec:
-          cloneCodebase: true
+          cloneCodebase: false
           platform:
             os: Linux
             arch: Amd64

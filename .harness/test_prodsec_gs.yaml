@@ -146,7 +146,7 @@ pipeline:
                     environmentVariables:
                       - name: skipTests
                         type: String
-                        value: "true"
+                        value: "false"
                     outputVariables: []
                   timeout: 10m
         tags: {}

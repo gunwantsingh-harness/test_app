@@ -1,13 +1,17 @@
 pipeline:
-  name: semgrep-orch-test
+  name: test_prodsec_gs
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
+  variables:
+    - name: SKIP_TESTS
+      type: String
+      value: "true"
   tags: {}
   stages:
     - stage:
-        name: semgrep-orch
-        identifier: semgreporch
+        name: Semgrep Scan - Multiple Repos
+        identifier: Semgrep_Scan_Multiple_Repos
         description: ""
         type: SecurityTests
         spec:
@@ -22,23 +26,22 @@ pipeline:
             steps:
               - step:
                   type: Semgrep
-                  name: Semgrep_1
-                  identifier: Semgrep_1
+                  name: Semgrep_Scan
+                  identifier: Semgrep_Scan
                   strategy:
                     matrix:
                       maxConcurrency: 2
-                      organization:
-                        - name: harness
-                          repositories:
-                            - ffproxy
-                            - lite-engine
-                        - name: drone
-                          repositories:
-                            - drone-jira
-                            - drone-plugin-index
-                        - name: takipi
-                          repositories:
-                            - takipi-storage
+                      include:
+                        - organization: harness
+                          repository: ffproxy
+                        - organization: harness
+                          repository: lite-engine
+                        - organization: drone
+                          repository: drone-jira
+                        - organization: drone
+                          repository: drone-plugin-index
+                        - organization: takipi
+                          repository: takipi-storage
                   spec:
                     mode: orchestration
                     config: default
@@ -51,10 +54,16 @@ pipeline:
                         level: info
                     repository:
                       connectorRef: github_connector_ref
-                      repo: <+matrix.organization.name>/<+matrix.repository>
+                      repo: <+matrix.organization>/<+matrix.repository>
                       branch: ""
                     reportName: Semgrep_Scan_Report
           reports:
             formats:
               - type: sarif
             upload: true
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: MarkAsFailure

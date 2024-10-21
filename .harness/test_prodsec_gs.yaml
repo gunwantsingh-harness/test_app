@@ -48,7 +48,7 @@ pipeline:
                     target:
                       type: repository
                       detection: auto
-                      target_name: <+matrix.repository>
+                      target_name: <+matrix.organization>/<+matrix.repository>
                     advanced:
                       log:
                         level: info

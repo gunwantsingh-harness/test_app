@@ -4,12 +4,6 @@ pipeline:
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
   tags: {}
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: <+matrix.organization.name>/<+matrix.repository>
-        build: <+input>
   stages:
     - stage:
         name: semgrep-orch
@@ -17,7 +11,6 @@ pipeline:
         description: ""
         type: SecurityTests
         spec:
-          cloneCodebase: true
           platform:
             os: Linux
             arch: Amd64
@@ -54,6 +47,10 @@ pipeline:
                     advanced:
                       log:
                         level: info
+                    repository:
+                      connectorRef: github_connector_ref
+                      repo: <+matrix.organization.name>/<+matrix.repository>
+                      branch: ""
                     reportName: Semgrep_Scan_Report
           reports:
             formats:

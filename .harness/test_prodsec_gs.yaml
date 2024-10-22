@@ -5,9 +5,9 @@ pipeline:
   orgIdentifier: default
   stages:
     - stage:
-        name: Debug Matrix Resolution
-        identifier: Debug_Matrix_Resolution
-        description: Testing if matrix variables are being passed correctly
+        name: Clone and Scan Repositories
+        identifier: Clone_Scan_Repos
+        description: Manually define steps for each repository
         type: CI
         spec:
           cloneCodebase: false
@@ -20,36 +20,52 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Debug Matrix Variables
-                  identifier: Debug_Matrix_Vars
+                  name: Clone ffproxy Repo
+                  identifier: Clone_ffproxy
                   type: Run
-                  strategy:
-                    matrix:
-                      maxConcurrency: 1
-                      include:
-                        - org: harness
-                          repo: ffproxy
-                          url: https://github.com/harness/ffproxy
-                        - org: harness
-                          repo: lite-engine
-                          url: https://github.com/harness/lite-engine
-                        - org: drone
-                          repo: drone-jira
-                          url: https://github.com/drone/drone-jira
-                        - org: drone
-                          repo: drone-plugin-index
-                          url: https://github.com/drone/drone-plugin-index
-                        - org: takipi
-                          repo: takipi-storage
-                          url: https://github.com/takipi/takipi-storage
                   spec:
                     shell: Bash
                     command: |
-                      echo "DEBUG: Organization: <+matrix.org>"
-                      echo "DEBUG: Repository: <+matrix.repo>"
-                      echo "DEBUG: Repo URL: <+matrix.url>"
-                      if [ -z "<+matrix.url>" ]; then
-                        echo "Repository URL is missing!"
-                        exit 1
-                      fi
-                      echo "Matrix variables are working!"
+                      echo "Cloning repository harness/ffproxy"
+                      git clone https://github.com/harness/ffproxy
+                      # Add Semgrep or other steps as needed
+              - step:
+                  name: Clone lite-engine Repo
+                  identifier: Clone_lite_engine
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      echo "Cloning repository harness/lite-engine"
+                      git clone https://github.com/harness/lite-engine
+                      # Add Semgrep or other steps as needed
+              - step:
+                  name: Clone drone-jira Repo
+                  identifier: Clone_drone_jira
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      echo "Cloning repository drone/drone-jira"
+                      git clone https://github.com/drone/drone-jira
+                      # Add Semgrep or other steps as needed
+              - step:
+                  name: Clone drone-plugin-index Repo
+                  identifier: Clone_drone_plugin_index
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      echo "Cloning repository drone/drone-plugin-index"
+                      git clone https://github.com/drone/drone-plugin-index
+                      # Add Semgrep or other steps as needed
+              - step:
+                  name: Clone takipi-storage Repo
+                  identifier: Clone_takipi_storage
+                  type: Run
+                  spec:
+                    shell: Bash
+                    command: |
+                      echo "Cloning repository takipi/takipi-storage"
+                      git clone https://github.com/takipi/takipi-storage
+                      # Add Semgrep or other steps as needed

@@ -26,9 +26,9 @@ pipeline:
                       maxConcurrency: 2
                       organization:
                         - name: harness
-                          repositories: ffproxy lite-engine
+                          repositories: ffproxy
                         - name: drone
-                          repositories: drone-jira drone-plugin-index
+                          repositories: drone-jira
                         - name: takipi
                           repositories: takipi-storage
                   spec:

@@ -8,6 +8,12 @@ pipeline:
       type: String
       value: "true"
   tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: <+input>
+        build: <+input>
   stages:
     - stage:
         name: Clone Repositories
@@ -48,7 +54,6 @@ pipeline:
                           repository: takipi-storage
                           repo_url: https://github.com/takipi/takipi-storage
                   spec:
-                    connectorRef: github_connector_ref
                     command: |
                       echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
                       git clone <+matrix.repo_url>

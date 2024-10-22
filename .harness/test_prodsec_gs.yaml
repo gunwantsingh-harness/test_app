@@ -3,15 +3,11 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
-  variables:
-    - name: SKIP_TESTS
-      type: String
-      value: "true"
   stages:
     - stage:
-        name: Debug Matrix
-        identifier: Debug_Matrix_Stage
-        description: Debug matrix variable usage
+        name: Debug Matrix Resolution
+        identifier: Debug_Matrix_Resolution
+        description: Testing if matrix variables are being passed correctly
         type: CI
         spec:
           cloneCodebase: false
@@ -29,30 +25,31 @@ pipeline:
                   type: Run
                   strategy:
                     matrix:
+                      maxConcurrency: 1
                       include:
-                        - orgName: harness
-                          repoName: ffproxy
-                          repoUrl: https://github.com/harness/ffproxy
-                        - orgName: harness
-                          repoName: lite-engine
-                          repoUrl: https://github.com/harness/lite-engine
-                        - orgName: drone
-                          repoName: drone-jira
-                          repoUrl: https://github.com/drone/drone-jira
-                        - orgName: drone
-                          repoName: drone-plugin-index
-                          repoUrl: https://github.com/drone/drone-plugin-index
-                        - orgName: takipi
-                          repoName: takipi-storage
-                          repoUrl: https://github.com/takipi/takipi-storage
+                        - org: harness
+                          repo: ffproxy
+                          url: https://github.com/harness/ffproxy
+                        - org: harness
+                          repo: lite-engine
+                          url: https://github.com/harness/lite-engine
+                        - org: drone
+                          repo: drone-jira
+                          url: https://github.com/drone/drone-jira
+                        - org: drone
+                          repo: drone-plugin-index
+                          url: https://github.com/drone/drone-plugin-index
+                        - org: takipi
+                          repo: takipi-storage
+                          url: https://github.com/takipi/takipi-storage
                   spec:
                     shell: Bash
                     command: |
-                      echo "DEBUG: Organization: <+matrix.orgName>"
-                      echo "DEBUG: Repository: <+matrix.repoName>"
-                      echo "DEBUG: Repo URL: <+matrix.repoUrl>"
-                      if [ -z "<+matrix.repoUrl>" ]; then
+                      echo "DEBUG: Organization: <+matrix.org>"
+                      echo "DEBUG: Repository: <+matrix.repo>"
+                      echo "DEBUG: Repo URL: <+matrix.url>"
+                      if [ -z "<+matrix.url>" ]; then
                         echo "Repository URL is missing!"
                         exit 1
                       fi
-                      echo "Matrix is working!"
+                      echo "Matrix variables are working!"

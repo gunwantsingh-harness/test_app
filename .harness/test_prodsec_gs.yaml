@@ -110,9 +110,10 @@ pipeline:
                     command: |-
                       echo "Processing organization: <+matrix.organization.name>"
 
-                      # # Step 2: Split the space-separated repositories string into an array
-                      # IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
 
+                      # Step 2: Split the space-separated repositories string into an array
+                      IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
+                      echo IFS
                       # # Step 3: Loop over the repositories within the organization
                       # for repo in "${repos_array[@]}"; do
                       #   echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"

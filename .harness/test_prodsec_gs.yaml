@@ -69,3 +69,10 @@ pipeline:
                       echo "Cloning repository takipi/takipi-storage"
                       git clone https://github.com/takipi/takipi-storage
                       # Add Semgrep or other steps as needed
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []

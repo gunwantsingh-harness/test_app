@@ -7,18 +7,11 @@ pipeline:
     - name: SKIP_TESTS
       type: String
       value: "true"
-  tags: {}
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: <+input>
-        build: <+input>
   stages:
     - stage:
-        name: Clone Repositories
-        identifier: Clone_Repos_Stage
-        description: Cloning repositories for the scan
+        name: Debug Matrix
+        identifier: Debug_Matrix_Stage
+        description: Debug matrix variable usage
         type: CI
         spec:
           cloneCodebase: false
@@ -31,98 +24,35 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Clone Repositories
-                  identifier: Clone_Repos
+                  name: Debug Matrix Variables
+                  identifier: Debug_Matrix_Vars
                   type: Run
                   strategy:
                     matrix:
                       include:
-                        - org: harness
-                          repo: ffproxy
-                          repo_url: https://github.com/harness/ffproxy
-                        - org: harness
-                          repo: lite-engine
-                          repo_url: https://github.com/harness/lite-engine
-                        - org: drone
-                          repo: drone-jira
-                          repo_url: https://github.com/drone/drone-jira
-                        - org: drone
-                          repo: drone-plugin-index
-                          repo_url: https://github.com/drone/drone-plugin-index
-                        - org: takipi
-                          repo: takipi-storage
-                          repo_url: https://github.com/takipi/takipi-storage
+                        - orgName: harness
+                          repoName: ffproxy
+                          repoUrl: https://github.com/harness/ffproxy
+                        - orgName: harness
+                          repoName: lite-engine
+                          repoUrl: https://github.com/harness/lite-engine
+                        - orgName: drone
+                          repoName: drone-jira
+                          repoUrl: https://github.com/drone/drone-jira
+                        - orgName: drone
+                          repoName: drone-plugin-index
+                          repoUrl: https://github.com/drone/drone-plugin-index
+                        - orgName: takipi
+                          repoName: takipi-storage
+                          repoUrl: https://github.com/takipi/takipi-storage
                   spec:
                     shell: Bash
                     command: |
-                      echo "DEBUG: Organization: <+matrix.org>"
-                      echo "DEBUG: Repository: <+matrix.repo>"
-                      echo "DEBUG: Repo URL: <+matrix.repo_url>"
-                      if [ -z "<+matrix.repo_url>" ]; then
+                      echo "DEBUG: Organization: <+matrix.orgName>"
+                      echo "DEBUG: Repository: <+matrix.repoName>"
+                      echo "DEBUG: Repo URL: <+matrix.repoUrl>"
+                      if [ -z "<+matrix.repoUrl>" ]; then
                         echo "Repository URL is missing!"
                         exit 1
                       fi
-                      git clone <+matrix.repo_url>
-    - stage:
-        name: Semgrep Scan - Multiple Repos
-        identifier: Semgrep_Scan_Multiple_Repos
-        description: Scan multiple repositories using STO and Semgrep
-        type: SecurityTests
-        spec:
-          cloneCodebase: false
-          platform:
-            os: Linux
-            arch: Amd64
-          runtime:
-            type: Cloud
-            spec: {}
-          execution:
-            steps:
-              - step:
-                  type: Semgrep
-                  name: Semgrep_Scan
-                  identifier: Semgrep_Scan
-                  strategy:
-                    matrix:
-                      maxConcurrency: 2
-                      include:
-                        - org: harness
-                          repo: ffproxy
-                          target_name: harness-ffproxy
-                        - org: harness
-                          repo: lite-engine
-                          target_name: harness-lite-engine
-                        - org: drone
-                          repo: drone-jira
-                          target_name: drone-drone-jira
-                        - org: drone
-                          repo: drone-plugin-index
-                          target_name: drone-drone-plugin-index
-                        - org: takipi
-                          repo: takipi-storage
-                          target_name: takipi-takipi-storage
-                  spec:
-                    mode: orchestration
-                    config: default
-                    target:
-                      type: repository
-                      detection: auto
-                      target_name: <+matrix.target_name>
-                    advanced:
-                      log:
-                        level: info
-                    repository:
-                      connectorRef: test_GS_apphio
-                      repo: ./<+matrix.repo>
-                      branch: ""
-                    reportName: Semgrep_Scan_Report_<+matrix.repo>
-          reports:
-            formats:
-              - type: sarif
-            upload: true
-        failureStrategies:
-          - onFailure:
-              errors:
-                - AllErrors
-              action:
-                type: MarkAsFailure
+                      echo "Matrix is working!"

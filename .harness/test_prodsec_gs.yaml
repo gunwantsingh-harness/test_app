@@ -72,3 +72,10 @@ pipeline:
                   - AllErrors
                 action:
                   type: MarkAsFailure
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []

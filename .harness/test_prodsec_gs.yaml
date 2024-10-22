@@ -25,8 +25,6 @@ pipeline:
                     matrix:
                       maxConcurrency: 2
                       organization:
-                        - name: harness
-                          repositories: ffproxy
                         - name: drone
                           repositories: drone-jira
                         - name: takipi
@@ -37,17 +35,6 @@ pipeline:
                       type: Inline
                       spec:
                         script: |
-                          # Step 1: Install Python, pip, and Semgrep using microdnf
-                          # echo "Installing Python, pip, and Semgrep using microdnf..."
-                          # microdnf install -y python39 python39-pip git jq
-                          # microdnf clean all
-
-                          # Install Semgrep
-                          # pip3 install semgrep
-
-                          # Verify Semgrep installation
-                          # semgrep --version || { echo "Semgrep installation failed"; exit 1; }
-
                           echo "Processing organization: <+matrix.organization.name>"
 
                           # Step 2: Split the space-separated repositories string into an array
@@ -71,17 +58,9 @@ pipeline:
 
                             git checkout $default_branch
 
-                            # Step 4: Run Semgrep on the default branch
-                            # result_file="../${repo}_results.sarif"
-                            # semgrep ci --config auto --sarif -o $result_file
-
-                            # Step 5: Check if the results file was created
-                            # if [ -f "$result_file" ]; then
-                            #     issues_count=$(jq '.runs[0].results | length' $result_file)
-                            #     echo "Total issues found in ${repo}: $issues_count"
-                            # else
-                            #     echo "No results file generated for ${repo}"
-                            # fi
+                            # List the contents of the cloned repository
+                            echo "Contents of the cloned repository <+matrix.organization.name>/${repo}:"
+                            ls -al
 
                             # Cleanup
                             cd ..

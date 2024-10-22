@@ -54,8 +54,13 @@ pipeline:
                           repository: takipi-storage
                           repo_url: https://github.com/takipi/takipi-storage
                   spec:
+                    shell: Bash
                     command: |
                       echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
+                      if [ -z "<+matrix.repo_url>" ]; then
+                        echo "Repository URL is missing!"
+                        exit 1
+                      fi
                       git clone <+matrix.repo_url>
     - stage:
         name: Semgrep Scan - Multiple Repos

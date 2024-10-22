@@ -3,16 +3,12 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
-  variables:
-    - name: SKIP_TESTS
-      type: String
-      value: "true"
   stages:
     - stage:
-        name: Semgrep Scan - Multiple repos
-        identifier: Semgrep_Scan_Multiple_repos
-        description: Scan multiple repositories using STO and Semgrep
-        type: SecurityTests
+        name: Clone Repositories Stage
+        identifier: Clone_Repos_Stage
+        description: Cloning multiple repositories using matrix strategy
+        type: CI
         spec:
           cloneCodebase: false
           platform:
@@ -24,41 +20,36 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Semgrep Scan with Matrix
-                  identifier: Semgrep_Scan_Matrix
-                  type: Semgrep
+                  name: Clone Repositories
+                  identifier: Clone_Repos
+                  type: Run
                   strategy:
                     matrix:
                       maxConcurrency: 2
-                      organization:
-                        - name: harness
-                          repositories: ffproxy lite-engine
-                        - name: drone
-                          repositories: drone-jira drone-plugin-index
-                        - name: takipi
-                          repositories: takipi-storage
+                      include:
+                        - organization: harness
+                          repository: ffproxy
+                          repo_url: https://github.com/harness/ffproxy
+                        - organization: harness
+                          repository: lite-engine
+                          repo_url: https://github.com/harness/lite-engine
+                        - organization: drone
+                          repository: drone-jira
+                          repo_url: https://github.com/drone/drone-jira
+                        - organization: drone
+                          repository: drone-plugin-index
+                          repo_url: https://github.com/drone/drone-plugin-index
+                        - organization: takipi
+                          repository: takipi-storage
+                          repo_url: https://github.com/takipi/takipi-storage
                   spec:
-                    mode: orchestration
-                    config: default
-                    target:
-                      type: repository
-                      detection: auto
-                      target_name: <+matrix.organization.name>/<+matrix.repository>
-                    advanced:
-                      log:
-                        level: info
-                    repository:
-                      connectorRef: github_connector_ref
-                      repo: <+matrix.organization.name>/<+matrix.repository>
-                      branch: ""
-                    reportName: Semgrep_Scan_Report_<+matrix.repository>
-          reports:
-            formats:
-              - type: sarif
-            upload: true
-        failureStrategies:
-          - onFailure:
-              errors:
-                - AllErrors
-              action:
-                type: MarkAsFailure
+                    shell: Bash
+                    command: |
+                      echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
+                      git clone <+matrix.repo_url>
+                      if [ $? -ne 0 ]; then
+                        echo "Failed to clone repository <+matrix.organization>/<+matrix.repository>"
+                        exit 1
+                      else
+                        echo "Successfully cloned <+matrix.organization>/<+matrix.repository>"
+                      fi

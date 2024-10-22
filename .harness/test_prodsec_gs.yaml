@@ -108,33 +108,45 @@ pipeline:
                   strategy:
                     matrix:
                       maxConcurrency: 2
-                      include:
-                        - organization: harness
-                          repository: ffproxy
-                          repo_url: https://github.com/harness/ffproxy
-                        - organization: drone
-                          repository: drone-jira
-                          repo_url: https://github.com/drone/drone-jira
-                        - organization: takipi
-                          repository: takipi-storage
-                          repo_url: https://github.com/takipi/takipi-storage
+                      organization:
+                        - name: drone
+                          repositories: drone-jira
+                        - name: takipi
+                          repositories: takipi-storage
                   spec:
                     shell: Bash
-                    command: |
-                      echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
+                    command: |-
+                      echo "Processing organization: <+matrix.organization.name>"
 
-                      # Clone the repository
-                      git clone <+matrix.repo_url>
-                      if [ $? -ne 0 ]; then
-                        echo "Failed to clone repository <+matrix.organization>/<+matrix.repository>"
-                        exit 1
-                      else
-                        echo "Successfully cloned <+matrix.organization>/<+matrix.repository>"
-                        echo "Listing contents of <+matrix.repository>"
+                      # Step 2: Split the space-separated repositories string into an array
+                      IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
+
+                      # Step 3: Loop over the repositories within the organization
+                      for repo in "${repos_array[@]}"; do
+                        echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"
+
+                        git clone https://github.com/<+matrix.organization.name>/${repo}.git
+                        if [ $? -ne 0 ]; then
+                            echo "Failed to clone repository <+matrix.organization.name>/${repo}. Skipping."
+                            continue
+                        fi
+
+                        cd ${repo} || exit 1
+
+                        # Fetch the default branch
+                        default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+                        echo "Default branch for ${repo} is ${default_branch}"
+
+                        git checkout $default_branch
 
                         # List the contents of the cloned repository
-                        ls -al <+matrix.repository>
-                      fi
+                        echo "Contents of the cloned repository <+matrix.organization.name>/${repo}:"
+                        ls -al
+
+                        # Cleanup
+                        cd ..
+                        rm -rf ${repo}
+                      done
           sharedPaths:
             - ""
           buildIntelligence:

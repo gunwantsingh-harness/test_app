@@ -83,3 +83,29 @@ pipeline:
               action:
                 type: MarkAsFailure
         tags: {}
+    - stage:
+        name: Semgrep
+        identifier: Semgrep
+        description: ""
+        type: SecurityTests
+        spec:
+          cloneCodebase: false
+          caching:
+            enabled: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Clone Repos
+                  identifier: Clone_Repos
+                  spec:
+                    shell: Sh
+                    command: |-
+                      pwd
+                      ls

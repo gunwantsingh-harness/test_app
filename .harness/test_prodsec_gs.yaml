@@ -107,5 +107,42 @@ pipeline:
                   spec:
                     shell: Sh
                     command: |-
-                      pwd
-                      ls
+                      echo "Processing organization: <+matrix.organization.name>"
+
+                      # Step 2: Split the space-separated repositories string into an array
+                      IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
+
+                      # Step 3: Loop over the repositories within the organization
+                      for repo in "${repos_array[@]}"; do
+                        echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"
+
+                        git clone https://github.com/<+matrix.organization.name>/${repo}.git
+                        if [ $? -ne 0 ]; then
+                            echo "Failed to clone repository <+matrix.organization.name>/${repo}. Skipping."
+                            continue
+                        fi
+
+                        cd ${repo} || exit 1
+
+                        # Fetch the default branch
+                        default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+                        echo "Default branch for ${repo} is ${default_branch}"
+
+                        git checkout $default_branch
+
+                        # List the contents of the cloned repository
+                        echo "Contents of the cloned repository <+matrix.organization.name>/${repo}:"
+                        ls -al
+
+                        # Cleanup
+                        cd ..
+                        rm -rf ${repo}
+                      done
+                  strategy:
+                    matrix:
+                      maxConcurrency: 2
+                      organization:
+                        - name: drone
+                          repositories: drone-jira
+                        - name: takipi
+                          repositories: takipi-storage

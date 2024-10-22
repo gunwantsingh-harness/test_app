@@ -36,28 +36,27 @@ pipeline:
                   type: Run
                   strategy:
                     matrix:
-                      maxConcurrency: 2
                       include:
-                        - organization: harness
-                          repository: ffproxy
+                        - org: harness
+                          repo: ffproxy
                           repo_url: https://github.com/harness/ffproxy
-                        - organization: harness
-                          repository: lite-engine
+                        - org: harness
+                          repo: lite-engine
                           repo_url: https://github.com/harness/lite-engine
-                        - organization: drone
-                          repository: drone-jira
+                        - org: drone
+                          repo: drone-jira
                           repo_url: https://github.com/drone/drone-jira
-                        - organization: drone
-                          repository: drone-plugin-index
+                        - org: drone
+                          repo: drone-plugin-index
                           repo_url: https://github.com/drone/drone-plugin-index
-                        - organization: takipi
-                          repository: takipi-storage
+                        - org: takipi
+                          repo: takipi-storage
                           repo_url: https://github.com/takipi/takipi-storage
                   spec:
                     shell: Bash
                     command: |
-                      echo "DEBUG: Organization: <+matrix.organization>"
-                      echo "DEBUG: Repository: <+matrix.repository>"
+                      echo "DEBUG: Organization: <+matrix.org>"
+                      echo "DEBUG: Repository: <+matrix.repo>"
                       echo "DEBUG: Repo URL: <+matrix.repo_url>"
                       if [ -z "<+matrix.repo_url>" ]; then
                         echo "Repository URL is missing!"
@@ -87,20 +86,20 @@ pipeline:
                     matrix:
                       maxConcurrency: 2
                       include:
-                        - organization: harness
-                          repository: ffproxy
+                        - org: harness
+                          repo: ffproxy
                           target_name: harness-ffproxy
-                        - organization: harness
-                          repository: lite-engine
+                        - org: harness
+                          repo: lite-engine
                           target_name: harness-lite-engine
-                        - organization: drone
-                          repository: drone-jira
+                        - org: drone
+                          repo: drone-jira
                           target_name: drone-drone-jira
-                        - organization: drone
-                          repository: drone-plugin-index
+                        - org: drone
+                          repo: drone-plugin-index
                           target_name: drone-drone-plugin-index
-                        - organization: takipi
-                          repository: takipi-storage
+                        - org: takipi
+                          repo: takipi-storage
                           target_name: takipi-takipi-storage
                   spec:
                     mode: orchestration
@@ -114,9 +113,9 @@ pipeline:
                         level: info
                     repository:
                       connectorRef: test_GS_apphio
-                      repo: ./<+matrix.repository>
+                      repo: ./<+matrix.repo>
                       branch: ""
-                    reportName: Semgrep_Scan_Report_<+matrix.repository>
+                    reportName: Semgrep_Scan_Report_<+matrix.repo>
           reports:
             formats:
               - type: sarif

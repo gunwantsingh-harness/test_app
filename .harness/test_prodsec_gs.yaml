@@ -3,17 +3,12 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
-  variables:
-    - name: SKIP_TESTS
-      type: String
-      value: "true"
-  tags: {}
   stages:
     - stage:
-        name: Semgrep Scan - Multiple repos
-        identifier: Semgrep_Scan_Multiple_repos
-        description: ""
-        type: SecurityTests
+        name: Clone Repositories Stage
+        identifier: Clone_Repos_Stage
+        description: Cloning multiple repositories using matrix strategy
+        type: CI
         spec:
           cloneCodebase: false
           platform:
@@ -25,9 +20,9 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: STO Semgrep Scan
-                  identifier: Sto_Semgrep_Scan
-                  type: Semgrep
+                  name: Clone Repositories and List Contents
+                  identifier: Clone_Repos_And_LS
+                  type: Run
                   strategy:
                     matrix:
                       maxConcurrency: 2
@@ -48,34 +43,24 @@ pipeline:
                           repository: takipi-storage
                           repo_url: https://github.com/takipi/takipi-storage
                   spec:
-                    mode: orchestration
-                    config: default
-                    target:
-                      type: repository
-                      detection: auto
-                      target_name: <+matrix.repo_url>
-                    advanced:
-                      log:
-                        level: info
-                    repository:
-                      connectorRef: github_connector_ref
-                      repo: <+matrix.repo_url>
-                      branch: ""
-                    reportName: Semgrep_Scan_Report_<+matrix.repository>
-          reports:
-            formats:
-              - type: sarif
-            upload: true
-          failureStrategies:
-            - onFailure:
-                errors:
-                  - AllErrors
-                action:
-                  type: MarkAsFailure
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: test_app
-        build: <+input>
-        sparseCheckout: []
+                    connectorRef: test_GS_apphio
+                    shell: Bash
+                    command: |
+                      echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
+
+                      git clone <+matrix.repo_url>
+                      if [ $? -ne 0 ]; then
+                        echo "Failed to clone repository <+matrix.organization>/<+matrix.repository>"
+                        exit 1
+                      else
+                        echo "Successfully cloned <+matrix.organization>/<+matrix.repository>"
+                      fi
+
+                      # Navigate into the repository folder and list its contents
+                      repo_dir="<+matrix.repository>"
+                      if [ -d "$repo_dir" ]; then
+                        echo "Listing contents of <+matrix.repository>:"
+                        ls "$repo_dir"
+                      else
+                        echo "Directory <+matrix.repository> does not exist. Clone might have failed."
+                      fi

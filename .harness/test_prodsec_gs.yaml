@@ -3,12 +3,16 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
+  variables:
+    - name: SKIP_TESTS
+      type: String
+      value: "true"
   stages:
     - stage:
-        name: Clone and Scan Repositories
-        identifier: Clone_Scan_Repos
-        description: Manually define steps for each repository
-        type: CI
+        name: Semgrep Scan - Multiple repos
+        identifier: Semgrep_Scan_Multiple_repos
+        description: Scan multiple repositories using STO and Semgrep
+        type: SecurityTests
         spec:
           cloneCodebase: false
           platform:
@@ -20,59 +24,41 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Clone ffproxy Repo
-                  identifier: Clone_ffproxy
-                  type: Run
+                  name: Semgrep Scan with Matrix
+                  identifier: Semgrep_Scan_Matrix
+                  type: Semgrep
+                  strategy:
+                    matrix:
+                      maxConcurrency: 2
+                      organization:
+                        - name: harness
+                          repositories: ffproxy lite-engine
+                        - name: drone
+                          repositories: drone-jira drone-plugin-index
+                        - name: takipi
+                          repositories: takipi-storage
                   spec:
-                    shell: Bash
-                    command: |
-                      echo "Cloning repository harness/ffproxy"
-                      git clone https://github.com/harness/ffproxy
-                      # Add Semgrep or other steps as needed
-              - step:
-                  name: Clone lite-engine Repo
-                  identifier: Clone_lite_engine
-                  type: Run
-                  spec:
-                    shell: Bash
-                    command: |
-                      echo "Cloning repository harness/lite-engine"
-                      git clone https://github.com/harness/lite-engine
-                      # Add Semgrep or other steps as needed
-              - step:
-                  name: Clone drone-jira Repo
-                  identifier: Clone_drone_jira
-                  type: Run
-                  spec:
-                    shell: Bash
-                    command: |
-                      echo "Cloning repository drone/drone-jira"
-                      git clone https://github.com/drone/drone-jira
-                      # Add Semgrep or other steps as needed
-              - step:
-                  name: Clone drone-plugin-index Repo
-                  identifier: Clone_drone_plugin_index
-                  type: Run
-                  spec:
-                    shell: Bash
-                    command: |
-                      echo "Cloning repository drone/drone-plugin-index"
-                      git clone https://github.com/drone/drone-plugin-index
-                      # Add Semgrep or other steps as needed
-              - step:
-                  name: Clone takipi-storage Repo
-                  identifier: Clone_takipi_storage
-                  type: Run
-                  spec:
-                    shell: Bash
-                    command: |
-                      echo "Cloning repository takipi/takipi-storage"
-                      git clone https://github.com/takipi/takipi-storage
-                      # Add Semgrep or other steps as needed
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: test_app
-        build: <+input>
-        sparseCheckout: []
+                    mode: orchestration
+                    config: default
+                    target:
+                      type: repository
+                      detection: auto
+                      target_name: <+matrix.organization.name>/<+matrix.repository>
+                    advanced:
+                      log:
+                        level: info
+                    repository:
+                      connectorRef: github_connector_ref
+                      repo: <+matrix.organization.name>/<+matrix.repository>
+                      branch: ""
+                    reportName: Semgrep_Scan_Report_<+matrix.repository>
+          reports:
+            formats:
+              - type: sarif
+            upload: true
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: MarkAsFailure

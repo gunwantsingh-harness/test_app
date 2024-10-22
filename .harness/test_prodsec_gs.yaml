@@ -4,12 +4,6 @@ pipeline:
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
   tags: {}
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: takipi-storage
-        build: <+input>
   stages:
     - stage:
         name: Semgrep Scan

@@ -3,6 +3,11 @@ pipeline:
   identifier: test_prodsec_gs
   projectIdentifier: Security_Test_Scans
   orgIdentifier: default
+  variables:
+    - name: SKIP_TESTS
+      type: String
+      value: "true"
+  tags: {}
   stages:
     - stage:
         name: Clone Repositories Stage
@@ -20,8 +25,8 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Clone Repositories and List Contents
-                  identifier: Clone_Repos_And_LS
+                  name: Clone Repositories
+                  identifier: Clone_Repos
                   type: Run
                   strategy:
                     matrix:
@@ -43,24 +48,68 @@ pipeline:
                           repository: takipi-storage
                           repo_url: https://github.com/takipi/takipi-storage
                   spec:
-                    connectorRef: test_GS_apphio
+                    connectorRef: test_app_apphio
                     shell: Bash
                     command: |
                       echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
-
                       git clone <+matrix.repo_url>
                       if [ $? -ne 0 ]; then
                         echo "Failed to clone repository <+matrix.organization>/<+matrix.repository>"
                         exit 1
                       else
                         echo "Successfully cloned <+matrix.organization>/<+matrix.repository>"
+                        ls -al "<+matrix.repository>"  # List contents of the cloned repository
                       fi
-
-                      # Navigate into the repository folder and list its contents
-                      repo_dir="<+matrix.repository>"
-                      if [ -d "$repo_dir" ]; then
-                        echo "Listing contents of <+matrix.repository>:"
-                        ls "$repo_dir"
-                      else
-                        echo "Directory <+matrix.repository> does not exist. Clone might have failed."
-                      fi
+    - stage:
+        name: Semgrep Scan Stage
+        identifier: Semgrep_Scan_Stage
+        description: Scanning the cloned repositories using STO and Semgrep
+        type: SecurityTests
+        spec:
+          cloneCodebase: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  name: Semgrep Scan
+                  identifier: Semgrep_Scan
+                  type: Semgrep
+                  strategy:
+                    matrix:
+                      maxConcurrency: 2
+                      include:
+                        - organization: harness
+                          repository: ffproxy
+                          target_name: ffproxy
+                        - organization: harness
+                          repository: lite-engine
+                          target_name: lite-engine
+                        - organization: drone
+                          repository: drone-jira
+                          target_name: drone-jira
+                        - organization: drone
+                          repository: drone-plugin-index
+                          target_name: drone-plugin-index
+                        - organization: takipi
+                          repository: takipi-storage
+                          target_name: takipi-storage
+                  spec:
+                    mode: orchestration
+                    config: default
+                    target:
+                      type: repository
+                      detection: auto
+                      target_name: <+matrix.target_name>
+                    advanced:
+                      log:
+                        level: info
+                    repository:
+                      connectorRef: github_connector_ref
+                      repo: ./<+matrix.target_name>
+                      branch: ""
+                    reportName: Semgrep_Scan_Report_<+matrix.repository>

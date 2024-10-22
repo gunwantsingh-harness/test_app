@@ -18,7 +18,7 @@ pipeline:
           execution:
             steps:
               - step:
-                  name: Install Dependencies and Scan Repositories
+                  name: Clone Repos
                   identifier: Install_and_Scan
                   type: ShellScript
                   strategy:

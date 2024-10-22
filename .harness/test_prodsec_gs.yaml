@@ -56,7 +56,9 @@ pipeline:
                   spec:
                     shell: Bash
                     command: |
-                      echo "Cloning repository <+matrix.organization>/<+matrix.repository> from <+matrix.repo_url>"
+                      echo "DEBUG: Organization: <+matrix.organization>"
+                      echo "DEBUG: Repository: <+matrix.repository>"
+                      echo "DEBUG: Repo URL: <+matrix.repo_url>"
                       if [ -z "<+matrix.repo_url>" ]; then
                         echo "Repository URL is missing!"
                         exit 1

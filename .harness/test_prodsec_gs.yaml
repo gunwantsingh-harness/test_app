@@ -53,3 +53,10 @@ pipeline:
                       else
                         echo "Successfully cloned <+matrix.organization>/<+matrix.repository>"
                       fi
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []

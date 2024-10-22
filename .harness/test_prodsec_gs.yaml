@@ -113,3 +113,10 @@ pipeline:
                       repo: ./<+matrix.target_name>
                       branch: ""
                     reportName: Semgrep_Scan_Report_<+matrix.repository>
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []

@@ -72,7 +72,7 @@ pipeline:
                         name: GitClone_1
                         identifier: GitClone_1
                         spec:
-                          connectorRef: test_GS_apphio
+                          connectorRef: pranaytodolist
                           repoName: <+matrix.jira.split(":")[0]>
                           cloneDirectory: /harness/<+matrix.jira.split(":")[0]>
                           build:
@@ -121,10 +121,3 @@ pipeline:
             enabled: false
   identifier: semgrep_test_29_10
   name: semgrep_test_29_10
-  properties:
-    ci:
-      codebase:
-        connectorRef: test_GS_apphio
-        repoName: test_app
-        build: <+input>
-        sparseCheckout: []

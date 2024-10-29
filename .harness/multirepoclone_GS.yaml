@@ -137,18 +137,19 @@ pipeline:
                       #!/bin/bash
 
                       # Initialize the CSV file with a header
-                      echo "Repository,Total Findings,Critical,High,Medium,Low" > sarif_summary.csv
+                      output_file="sarif_summary.csv"
+                      echo "Repository,Total Findings,Critical,High,Medium,Low" > $output_file
 
                       # Locate and process each SARIF file
                       find / -type f -name "output.sarif" 2>/dev/null | while read sarif_file; do
-                          # Extract repository name directly from the SARIF file
-                          repo_name=$(jq -r '.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri' "$sarif_file" | cut -d '/' -f 1)
-                          
-                          # Calculate total findings
+                          # Extract repository name from SARIF file, setting to "Unknown" if missing
+                          repo_name=$(jq -r '.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri // "Unknown"' "$sarif_file" | cut -d '/' -f 1)
+
+                          # Count total findings
                           total_findings=$(jq '.runs[].results | length' "$sarif_file" || echo "0")
-                          
-                          # Calculate severity levels; default to 0 if not found
-                          critical=$(jq '[.runs[].results[] | select(.properties."security-severity" == 9 or .properties.severity == "CRITICAL")] | length' "$sarif_file" || echo "0")
+
+                          # Extract severities
+                          critical=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 9 or .properties.severity == "CRITICAL")] | length' "$sarif_file" || echo "0")
                           high=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 7 and .properties."security-severity" < 9 or .properties.severity == "HIGH")] | length' "$sarif_file" || echo "0")
                           medium=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 4 and .properties."security-severity" < 7 or .properties.severity == "MEDIUM")] | length' "$sarif_file" || echo "0")
                           low=$(jq '[.runs[].results[] | select(.properties."security-severity" < 4 or .properties.severity == "LOW")] | length' "$sarif_file" || echo "0")
@@ -159,12 +160,12 @@ pipeline:
                           echo "Critical: $critical, High: $high, Medium: $medium, Low: $low"
                           echo "----------------------------------------"
                           
-                          # Append the data to the CSV file
-                          echo "$repo_name,$total_findings,$critical,$high,$medium,$low" >> sarif_summary.csv
+                          # Append data to the CSV file
+                          echo "$repo_name,$total_findings,$critical,$high,$medium,$low" >> $output_file
                       done
 
                       # Confirm CSV summary creation
-                      echo "CSV summary created: sarif_summary.csv"
+                      echo "CSV summary created: $output_file"
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

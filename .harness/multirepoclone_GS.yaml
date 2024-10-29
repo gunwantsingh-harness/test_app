@@ -13,8 +13,8 @@ pipeline:
             steps:
               - step:
                   type: ShellScript
-                  name: ShellScript_1
-                  identifier: ShellScript_1
+                  name: Define_Repositories
+                  identifier: Define_Repositories
                   spec:
                     shell: Bash
                     executionTarget: {}
@@ -29,14 +29,11 @@ pipeline:
                           drone/drone-jira:master
                           drone/drone-plugin-index:main" > file.txt
 
-
-                          # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
+                          # Read lines from file.txt, convert to CSV, and remove duplicates
                           output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
 
-                          # # Save the CSV output to a variable
+                          # Save CSV output to a variable
                           csv_contents="$output"
-
-                          # # Print the CSV data
                           echo "$csv_contents"
                     environmentVariables: []
                     outputVariables:
@@ -81,8 +78,8 @@ pipeline:
                               branch: <+matrix.jira.split(":")[1]>
                     - step:
                         type: Semgrep
-                        name: Semgrep_1
-                        identifier: Semgrep_1
+                        name: Semgrep_Ingestion
+                        identifier: Semgrep_Ingestion
                         spec:
                           mode: orchestration
                           config: default
@@ -97,26 +94,20 @@ pipeline:
                               level: info
                   strategy:
                     matrix:
-                      jira: <+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>
-                      maxConcurrency: 1
+                      spec:
+                        maxConcurrency: 1
+                      jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
               - step:
                   type: Run
-                  name: Run_3
-                  identifier: Run_3
+                  name: Print_Results
+                  identifier: Print_Results
                   spec:
                     shell: Sh
                     command: |-
-                      echo "***********"
-                      pwd
-                      ls -la
-
-                      echo "*************"
-                      pwd
-                      ls ../harness
-
-                      echo "***********"
-
-                      #ls ../harness/drone-cli
+                      echo "HIGH Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.HIGH>"
+                      echo "MEDIUM Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.MEDIUM>"
+                      echo "NEW_HIGH Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.NEW_HIGH>"
+                      echo "NEW_MEDIUM Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.NEW_MEDIUM>"
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

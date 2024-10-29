@@ -71,12 +71,12 @@ pipeline:
                         identifier: GitClone_1
                         spec:
                           connectorRef: pranaytodolist
-                          repoName: "<+matrix.jira.split(\":\")[0]>"
-                          cloneDirectory: "/harness/<+matrix.jira.split(\":\")[0]>"
+                          repoName: <+matrix.jira.split(":")[0]>
+                          cloneDirectory: /harness/<+matrix.jira.split(":")[0]>
                           build:
                             type: branch
                             spec:
-                              branch: "<+matrix.jira.split(\":\")[1]>"
+                              branch: <+matrix.jira.split(":")[1]>
                     - step:
                         type: Semgrep
                         name: Semgrep_1
@@ -86,16 +86,16 @@ pipeline:
                           config: default
                           target:
                             type: repository
-                            workspace: "/harness/<+matrix.jira.split(\":\")[0]>"
+                            workspace: /harness/<+matrix.jira.split(":")[0]>
                             detection: manual
-                            name: "<+matrix.jira.split(\":\")[0]>"
-                            variant: "<+matrix.jira.split(\":\")[1]>"
+                            name: <+matrix.jira.split(":")[0]>
+                            variant: <+matrix.jira.split(":")[1]>
                           advanced:
                             log:
                               level: info
                   strategy:
                     matrix:
-                      jira: "<+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>"
+                      jira: <+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>
                       maxConcurrency: 1
               - step:
                   type: Run
@@ -119,3 +119,10 @@ pipeline:
             enabled: false
   identifier: multirepoclone_GS
   name: multi-repo-clone GS
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []

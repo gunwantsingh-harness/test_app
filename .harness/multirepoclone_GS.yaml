@@ -127,54 +127,6 @@ pipeline:
                       echo "find sarif"
                       ls /tmp
                       find / -name "output.sarif" 2>/dev/null
-              - step:
-                  type: Run
-                  name: Run_2
-                  identifier: Run_2
-                  spec:
-                    shell: Sh
-                    command: |-
-                      #!/bin/sh
-
-                      # Initialize the CSV file with a header
-                      output_file="sarif_summary.csv"
-                      echo "Repository,Total Findings,Critical,High,Medium,Low" > $output_file
-
-                      # Temporary file to hold summary data for final output
-                      temp_summary="/tmp/sarif_summary.txt"
-                      > $temp_summary  # Ensure it's empty
-
-                      # Locate and process each SARIF file
-                      find / -type f -name "output.sarif" 2>/dev/null | while read sarif_file; do
-                          # Extract repository name from SARIF file
-                          repo_name=$(jq -r '.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri // "Unknown"' "$sarif_file" | cut -d '/' -f 1)
-
-                          # Count total findings
-                          total_findings=$(jq '.runs[].results | length' "$sarif_file" || echo "0")
-
-                          # Extract severities based on confidence tags
-                          critical=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("CRITICAL"))] | length' "$sarif_file" || echo "0")
-                          high=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("HIGH CONFIDENCE"))] | length' "$sarif_file" || echo "0")
-                          medium=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("MEDIUM CONFIDENCE"))] | length' "$sarif_file" || echo "0")
-                          low=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("LOW CONFIDENCE"))] | length' "$sarif_file" || echo "0")
-                          
-                          # Save data to the temp summary file
-                          echo "$repo_name, $total_findings, Critical: $critical, High: $high, Medium: $medium, Low: $low" >> $temp_summary
-
-                          # Append data to the CSV file
-                          echo "$repo_name,$total_findings,$critical,$high,$medium,$low" >> $output_file
-                          
-                          # Display SARIF file with visual markers
-                          echo "******************************* SARIF FILE: $sarif_file *******************************"
-                          cat "$sarif_file"
-                          echo "******************************* END SARIF FILE *******************************"
-                      done
-
-                      # Print final summary
-                      echo "========================= FINAL SUMMARY ========================="
-                      cat $temp_summary
-                      echo "================================================================"
-                      echo "CSV summary created: $output_file"
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

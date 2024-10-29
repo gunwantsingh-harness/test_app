@@ -117,21 +117,6 @@ pipeline:
                       echo "***********"
 
                       #ls ../harness/drone-cli
-              - step:
-                  type: Semgrep
-                  name: Semgrep_2
-                  identifier: Semgrep_2
-                  spec:
-                    mode: ingestion
-                    config: default
-                    target:
-                      type: repository
-                      detection: auto
-                    advanced:
-                      log:
-                        level: info
-                    ingestion:
-                      file: /harness/<+matrix.jira.split(":")[0]>/results.sarif
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

@@ -121,3 +121,10 @@ pipeline:
             enabled: false
   identifier: multirepoclone_GS
   name: multi-repo-clone GS
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []

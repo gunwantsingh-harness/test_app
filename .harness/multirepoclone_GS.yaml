@@ -105,14 +105,12 @@ pipeline:
                               config: default
                               target:
                                 type: repository
-                                detection: manual
-                                name: <+matrix.jira.split(":")[0]>
-                                variant: <+matrix.jira.split(":")[1]>
+                                detection: auto
                               advanced:
                                 log:
                                   level: info
                               ingestion:
-                                file: /harness/<+matrix.jira.split(":")[0]>/results.sarif
+                                file: /harness/results.sarif
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>

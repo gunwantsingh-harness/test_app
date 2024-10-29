@@ -148,10 +148,10 @@ pipeline:
                           total_findings=$(jq '.runs[].results | length' "$sarif_file" || echo "0")
                           
                           # Calculate severity levels; default to 0 if not found
-                          critical=$(jq '[.runs[].results[] | select(.level == "error" or .properties.severity == "CRITICAL")] | length' "$sarif_file" || echo "0")
-                          high=$(jq '[.runs[].results[] | select(.properties.severity == "HIGH")] | length' "$sarif_file" || echo "0")
-                          medium=$(jq '[.runs[].results[] | select(.properties.severity == "MEDIUM")] | length' "$sarif_file" || echo "0")
-                          low=$(jq '[.runs[].results[] | select(.properties.severity == "LOW")] | length' "$sarif_file" || echo "0")
+                          critical=$(jq '[.runs[].results[] | select(.properties."security-severity" == 9 or .properties.severity == "CRITICAL")] | length' "$sarif_file" || echo "0")
+                          high=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 7 and .properties."security-severity" < 9 or .properties.severity == "HIGH")] | length' "$sarif_file" || echo "0")
+                          medium=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 4 and .properties."security-severity" < 7 or .properties.severity == "MEDIUM")] | length' "$sarif_file" || echo "0")
+                          low=$(jq '[.runs[].results[] | select(.properties."security-severity" < 4 or .properties.severity == "LOW")] | length' "$sarif_file" || echo "0")
                           
                           # Print summary of each SARIF file
                           echo "Repository: $repo_name"
@@ -161,11 +161,6 @@ pipeline:
                           
                           # Append the data to the CSV file
                           echo "$repo_name,$total_findings,$critical,$high,$medium,$low" >> sarif_summary.csv
-                          
-                          # Nicely print SARIF file contents for review
-                          echo "Contents of $sarif_file:"
-                          jq '.' "$sarif_file" | head -n 20 # Adjust head for fewer/more lines if needed
-                          echo "----------------------------------------"
                       done
 
                       # Confirm CSV summary creation

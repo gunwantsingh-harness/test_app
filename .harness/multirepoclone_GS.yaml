@@ -136,32 +136,39 @@ pipeline:
                     command: |-
                       #!/bin/bash
 
-                      # CSV Header
+                      # CSV Header for summary
                       echo "Repository,Total Findings,Critical,High,Medium,Low" > sarif_summary.csv
 
-                      # Find all SARIF files from the root and process each
+                      # Locate and process each SARIF file
                       find / -type f -name "output.sarif" 2>/dev/null | while read sarif_file; do
-                          # Extract repository name or folder identifier from the path
+                          # Extract the repository or directory name from the path
                           repo_path=$(basename "$(dirname "$sarif_file")")
 
-                          # Extract counts for each severity level using jq
-                          total_findings=$(jq '.runs[].results | length' "$sarif_file")
-                          critical=$(jq '[.runs[].results[] | select(.level=="critical")] | length' "$sarif_file")
-                          high=$(jq '[.runs[].results[] | select(.level=="high")] | length' "$sarif_file")
-                          medium=$(jq '[.runs[].results[] | select(.level=="medium")] | length' "$sarif_file")
-                          low=$(jq '[.runs[].results[] | select(.level=="low")] | length' "$sarif_file")
+                          # Check if SARIF file has any results
+                          total_findings=$(jq '.runs[].results | length' "$sarif_file" || echo "0")
 
-                          # Print summary for each repository
+                          # Calculate severity levels; default to 0 if not found
+                          critical=$(jq '[.runs[].results[] | select(.level=="error" or .level=="critical")] | length' "$sarif_file" || echo "0")
+                          high=$(jq '[.runs[].results[] | select(.level=="warning" or .level=="high")] | length' "$sarif_file" || echo "0")
+                          medium=$(jq '[.runs[].results[] | select(.level=="note" or .level=="medium")] | length' "$sarif_file" || echo "0")
+                          low=$(jq '[.runs[].results[] | select(.level=="info" or .level=="low")] | length' "$sarif_file" || echo "0")
+
+                          # Print summary of each SARIF file
                           echo "Repository: $repo_path"
                           echo "Total Findings: $total_findings"
                           echo "Critical: $critical, High: $high, Medium: $medium, Low: $low"
                           echo "----------------------------------------"
 
-                          # Append the data to CSV
+                          # Append the data to the CSV file
                           echo "$repo_path,$total_findings,$critical,$high,$medium,$low" >> sarif_summary.csv
+
+                          # Nicely print SARIF file contents for review
+                          echo "Contents of $sarif_file:"
+                          jq '.' "$sarif_file" | head -n 20 # Print first 20 lines for a concise view
+                          echo "----------------------------------------"
                       done
 
-                      # Output CSV summary
+                      # Confirm CSV summary creation
                       echo "CSV summary created: sarif_summary.csv"
           buildIntelligence:
             enabled: false

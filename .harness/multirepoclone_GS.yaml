@@ -162,6 +162,11 @@ pipeline:
                           
                           # Append data to the CSV file
                           echo "$repo_name,$total_findings,$critical,$high,$medium,$low" >> $output_file
+                          
+                          # Print SARIF file content with separators
+                          echo "******************************* SARIF FILE: $sarif_file *******************************"
+                          cat "$sarif_file"
+                          echo "******************************* END SARIF FILE *******************************"
                       done
 
                       # Confirm CSV summary creation

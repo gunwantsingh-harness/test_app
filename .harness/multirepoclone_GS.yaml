@@ -140,36 +140,41 @@ pipeline:
                       output_file="sarif_summary.csv"
                       echo "Repository,Total Findings,Critical,High,Medium,Low" > $output_file
 
+                      # Initialize an array to hold summary data for final output
+                      declare -a summary_data
+
                       # Locate and process each SARIF file
                       find / -type f -name "output.sarif" 2>/dev/null | while read sarif_file; do
-                          # Extract repository name from SARIF file, setting to "Unknown" if missing
+                          # Extract repository name from SARIF file
                           repo_name=$(jq -r '.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri // "Unknown"' "$sarif_file" | cut -d '/' -f 1)
 
                           # Count total findings
                           total_findings=$(jq '.runs[].results | length' "$sarif_file" || echo "0")
 
-                          # Extract severities
-                          critical=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 9 or .properties.severity == "CRITICAL")] | length' "$sarif_file" || echo "0")
-                          high=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 7 and .properties."security-severity" < 9 or .properties.severity == "HIGH")] | length' "$sarif_file" || echo "0")
-                          medium=$(jq '[.runs[].results[] | select(.properties."security-severity" >= 4 and .properties."security-severity" < 7 or .properties.severity == "MEDIUM")] | length' "$sarif_file" || echo "0")
-                          low=$(jq '[.runs[].results[] | select(.properties."security-severity" < 4 or .properties.severity == "LOW")] | length' "$sarif_file" || echo "0")
+                          # Extract severities based on confidence tags
+                          critical=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("CRITICAL"))] | length' "$sarif_file" || echo "0")
+                          high=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("HIGH CONFIDENCE"))] | length' "$sarif_file" || echo "0")
+                          medium=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("MEDIUM CONFIDENCE"))] | length' "$sarif_file" || echo "0")
+                          low=$(jq '[.runs[].results[] | select(.properties.tags[] | contains("LOW CONFIDENCE"))] | length' "$sarif_file" || echo "0")
                           
-                          # Print summary of each SARIF file
-                          echo "Repository: $repo_name"
-                          echo "Total Findings: $total_findings"
-                          echo "Critical: $critical, High: $high, Medium: $medium, Low: $low"
-                          echo "----------------------------------------"
-                          
+                          # Append data to the summary array
+                          summary_data+=("$repo_name, $total_findings, Critical: $critical, High: $high, Medium: $medium, Low: $low")
+
                           # Append data to the CSV file
                           echo "$repo_name,$total_findings,$critical,$high,$medium,$low" >> $output_file
                           
-                          # Print SARIF file content with separators
+                          # Display SARIF file with visual markers
                           echo "******************************* SARIF FILE: $sarif_file *******************************"
                           cat "$sarif_file"
                           echo "******************************* END SARIF FILE *******************************"
                       done
 
-                      # Confirm CSV summary creation
+                      # Print final summary
+                      echo "========================= FINAL SUMMARY ========================="
+                      for entry in "${summary_data[@]}"; do
+                          echo "$entry"
+                      done
+                      echo "================================================================"
                       echo "CSV summary created: $output_file"
           buildIntelligence:
             enabled: false

@@ -112,6 +112,17 @@ pipeline:
 
                       echo "******** ls /harness/drone *********"
                       ls /harness/drone
+
+
+                      echo "******** ls /harness/drone/drone-jira *********"
+                      ls /harness/drone/drone-jira
+
+                      echo "******** ls /harness/drone/drone-plugin-index *********"
+                      ls /harness/drone/drone-plugin-index
+
+
+                      echo "******** ls /harness/drone/policy-mgmt *********"
+                      ls /harness/drone/policy-mgmt
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

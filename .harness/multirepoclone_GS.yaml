@@ -85,7 +85,7 @@ pipeline:
                           config: default
                           target:
                             type: repository
-                            workspace: /harness/<+matrix.jira.split(":")[0]>
+                            workspace: /harness/<+matrix.jira.split(":")[0]>/results.sarif
                             detection: manual
                             name: <+matrix.jira.split(":")[0]>
                             variant: <+matrix.jira.split(":")[1]>

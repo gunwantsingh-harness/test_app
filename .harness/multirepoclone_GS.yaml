@@ -125,6 +125,10 @@ pipeline:
 
                       echo "******** ls /harness/drone/policy-mgmt *********"
                       ls /harness/drone/policy-mgmt
+
+                      echo "find sarif"
+
+                      find / -name "results.sarif" 2>/dev/null
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

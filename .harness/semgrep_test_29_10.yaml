@@ -6,18 +6,16 @@ pipeline:
     - stage:
         name: Shell
         identifier: Shell
-        description: ""
         type: Custom
         spec:
           execution:
             steps:
               - step:
                   type: ShellScript
-                  name: ShellScript_1
-                  identifier: ShellScript_1
+                  name: Define_Repositories
+                  identifier: Define_Repositories
                   spec:
                     shell: Bash
-                    executionTarget: {}
                     source:
                       type: Inline
                       spec:
@@ -29,32 +27,19 @@ pipeline:
                           drone/drone-jira:master
                           drone/drone-plugin-index:main" > file.txt
 
-
-                          # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
                           output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
-
-                          # # Save the CSV output to a variable
                           csv_contents="$output"
-
-                          # # Print the CSV data
                           echo "$csv_contents"
-                    environmentVariables: []
                     outputVariables:
                       - name: myvar
                         type: String
                         value: csv_contents
-                  timeout: 10m
-        tags: {}
     - stage:
-        name: clone repos
-        identifier: clone_repos
-        description: ""
+        name: clone repos and scan
+        identifier: clone_repos_and_scan
         type: CI
         spec:
           cloneCodebase: false
-          caching:
-            enabled: false
-            paths: []
           platform:
             os: Linux
             arch: Amd64
@@ -69,8 +54,8 @@ pipeline:
                   steps:
                     - step:
                         type: GitClone
-                        name: GitClone_1
-                        identifier: GitClone_1
+                        name: GitClone_Repo
+                        identifier: GitClone_Repo
                         spec:
                           connectorRef: pranaytodolist
                           repoName: <+matrix.jira.split(":")[0]>
@@ -81,8 +66,8 @@ pipeline:
                               branch: <+matrix.jira.split(":")[1]>
                     - step:
                         type: Semgrep
-                        name: Semgrep_1
-                        identifier: Semgrep_1
+                        name: Semgrep_Scan
+                        identifier: Semgrep_Scan
                         spec:
                           mode: orchestration
                           config: default
@@ -92,31 +77,40 @@ pipeline:
                             detection: manual
                             name: <+matrix.jira.split(":")[0]>
                             variant: <+matrix.jira.split(":")[1]>
-                          advanced:
-                            log:
-                              level: info
+                        outputVariables:
+                          - name: CRITICAL
+                            type: String
+                          - name: HIGH
+                            type: String
+                          - name: MEDIUM
+                            type: String
+                          - name: LOW
+                            type: String
                   strategy:
                     matrix:
-                      jira: <+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>
-                      maxConcurrency: 1
+                      jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
               - step:
                   type: Run
-                  name: Run_3
-                  identifier: Run_3
+                  name: Print_Repository_Findings
+                  identifier: Print_Repository_Findings
                   spec:
                     shell: Sh
                     command: |-
-                      echo "***********"
-                      pwd
-                      ls -la
+                      repo="<+matrix.jira.split(':')[0]>"
+                      branch="<+matrix.jira.split(':')[1]>"
+                      critical="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.CRITICAL>"
+                      high="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.HIGH>"
+                      medium="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.MEDIUM>"
+                      low="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.LOW>"
+                      total=$((critical + high + medium + low))
 
-                      echo "*************"
-                      pwd
-                      ls ../harness
-
-                      echo "***********"
-
-                      #ls ../harness/drone-cli
+                      echo "Repository: $repo"
+                      echo "Branch: $branch"
+                      echo "Critical Findings: $critical"
+                      echo "High Findings: $high"
+                      echo "Medium Findings: $medium"
+                      echo "Low Findings: $low"
+                      echo "Total Findings: $total"
           buildIntelligence:
             enabled: false
   identifier: semgrep_test_29_10

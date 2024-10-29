@@ -79,38 +79,22 @@ pipeline:
                             type: branch
                             spec:
                               branch: <+matrix.jira.split(":")[1]>
-                    - parallel:
-                        - step:
-                            type: Semgrep
-                            name: Semgrep_1
-                            identifier: Semgrep_1
-                            spec:
-                              mode: orchestration
-                              config: default
-                              target:
-                                type: repository
-                                workspace: /harness/<+matrix.jira.split(":")[0]>
-                                detection: manual
-                                name: <+matrix.jira.split(":")[0]>
-                                variant: <+matrix.jira.split(":")[1]>
-                              advanced:
-                                log:
-                                  level: info
-                        - step:
-                            type: Semgrep
-                            name: Semgrep_2
-                            identifier: Semgrep_2
-                            spec:
-                              mode: ingestion
-                              config: default
-                              target:
-                                type: repository
-                                detection: auto
-                              advanced:
-                                log:
-                                  level: info
-                              ingestion:
-                                file: /harness/results.sarif
+                    - step:
+                        type: Semgrep
+                        name: Semgrep_1
+                        identifier: Semgrep_1
+                        spec:
+                          mode: orchestration
+                          config: default
+                          target:
+                            type: repository
+                            workspace: /harness/<+matrix.jira.split(":")[0]>
+                            detection: manual
+                            name: <+matrix.jira.split(":")[0]>
+                            variant: <+matrix.jira.split(":")[1]>
+                          advanced:
+                            log:
+                              level: info
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>
@@ -133,6 +117,21 @@ pipeline:
                       echo "***********"
 
                       #ls ../harness/drone-cli
+              - step:
+                  type: Semgrep
+                  name: Semgrep_2
+                  identifier: Semgrep_2
+                  spec:
+                    mode: ingestion
+                    config: default
+                    target:
+                      type: repository
+                      detection: auto
+                    advanced:
+                      log:
+                        level: info
+                    ingestion:
+                      file: /harness/<+matrix.jira.split(":")[0]>/results.sarif
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

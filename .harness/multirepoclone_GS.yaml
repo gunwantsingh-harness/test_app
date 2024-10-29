@@ -99,15 +99,16 @@ pipeline:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
               - step:
                   type: Run
-                  name: Print_Results
-                  identifier: Print_Results
+                  name: Run_1
+                  identifier: Run_1
                   spec:
                     shell: Sh
                     command: |-
-                      echo "HIGH Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.HIGH>"
-                      echo "MEDIUM Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.MEDIUM>"
-                      echo "NEW_HIGH Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.NEW_HIGH>"
-                      echo "NEW_MEDIUM Findings: <+pipeline.stages.clone_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Ingestion.output.outputVariables.NEW_MEDIUM>"
+                      echo "******* ls / *******"
+                      ls
+
+                      echo "******** ls /harness *********"
+                      ls /harness
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

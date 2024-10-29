@@ -27,6 +27,7 @@ pipeline:
                           drone/drone-jira:master
                           drone/drone-plugin-index:main" > file.txt
 
+                          # Convert lines to CSV and deduplicate
                           output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
                           csv_contents="$output"
                           echo "$csv_contents"
@@ -35,8 +36,8 @@ pipeline:
                         type: String
                         value: csv_contents
     - stage:
-        name: clone repos and scan
-        identifier: clone_repos_and_scan
+        name: Clone and Scan Repos
+        identifier: clone_and_scan_repos
         type: CI
         spec:
           cloneCodebase: false
@@ -77,15 +78,23 @@ pipeline:
                             detection: manual
                             name: <+matrix.jira.split(":")[0]>
                             variant: <+matrix.jira.split(":")[1]>
-                        outputVariables:
-                          - name: CRITICAL
-                            type: String
-                          - name: HIGH
-                            type: String
-                          - name: MEDIUM
-                            type: String
-                          - name: LOW
-                            type: String
+                          advanced:
+                            log:
+                              level: info
+                          output:
+                            outputVariables:
+                              - name: CRITICAL
+                                type: String
+                                value: <+execution.result.findings.CRITICAL>
+                              - name: HIGH
+                                type: String
+                                value: <+execution.result.findings.HIGH>
+                              - name: MEDIUM
+                                type: String
+                                value: <+execution.result.findings.MEDIUM>
+                              - name: LOW
+                                type: String
+                                value: <+execution.result.findings.LOW>
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
@@ -95,22 +104,25 @@ pipeline:
                   identifier: Print_Repository_Findings
                   spec:
                     shell: Sh
-                    command: |-
-                      repo="<+matrix.jira.split(':')[0]>"
-                      branch="<+matrix.jira.split(':')[1]>"
-                      critical="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.CRITICAL>"
-                      high="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.HIGH>"
-                      medium="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.MEDIUM>"
-                      low="<+pipeline.stages.clone_repos_and_scan.spec.execution.steps.Semgrep_Scan.output.outputVariables.LOW>"
-                      total=$((critical + high + medium + low))
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          repo="<+matrix.jira.split(':')[0]>"
+                          branch="<+matrix.jira.split(':')[1]>"
+                          critical="${<+pipeline.stages.clone_and_scan_repos.spec.execution.steps.Semgrep_Scan.output.outputVariables.CRITICAL>:-0}"
+                          high="${<+pipeline.stages.clone_and_scan_repos.spec.execution.steps.Semgrep_Scan.output.outputVariables.HIGH>:-0}"
+                          medium="${<+pipeline.stages.clone_and_scan_repos.spec.execution.steps.Semgrep_Scan.output.outputVariables.MEDIUM>:-0}"
+                          low="${<+pipeline.stages.clone_and_scan_repos.spec.execution.steps.Semgrep_Scan.output.outputVariables.LOW>:-0}"
+                          total=$((critical + high + medium + low))
 
-                      echo "Repository: $repo"
-                      echo "Branch: $branch"
-                      echo "Critical Findings: $critical"
-                      echo "High Findings: $high"
-                      echo "Medium Findings: $medium"
-                      echo "Low Findings: $low"
-                      echo "Total Findings: $total"
+                          echo "Repository: $repo"
+                          echo "Branch: $branch"
+                          echo "Critical Findings: $critical"
+                          echo "High Findings: $high"
+                          echo "Medium Findings: $medium"
+                          echo "Low Findings: $low"
+                          echo "Total Findings: $total"
           buildIntelligence:
             enabled: false
   identifier: semgrep_test_29_10

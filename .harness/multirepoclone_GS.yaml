@@ -81,6 +81,9 @@ pipeline:
                         name: Semgrep_Ingestion
                         identifier: Semgrep_Ingestion
                         spec:
+                          output:
+                            format: sarif
+                            path: /harness/<+matrix.jira.split(":")[0]>/results.sarif
                           mode: orchestration
                           config: default
                           target:

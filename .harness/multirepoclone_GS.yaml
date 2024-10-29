@@ -1,0 +1,121 @@
+pipeline:
+  projectIdentifier: Security_Test_Scans
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Shell
+        identifier: Shell
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: ShellScript_1
+                  identifier: ShellScript_1
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          echo "harness/drone-cli:master
+                          harness/lite-engine:main
+                          drone/drone-jira:master
+                          drone/drone-plugin-index:main" > file.txt
+
+
+                          # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
+                          output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
+
+                          # # Save the CSV output to a variable
+                          csv_contents="$output"
+
+                          # # Print the CSV data
+                          echo "$csv_contents"
+                    environmentVariables: []
+                    outputVariables:
+                      - name: myvar
+                        type: String
+                        value: csv_contents
+                  timeout: 10m
+        tags: {}
+    - stage:
+        name: clone repos
+        identifier: clone_repos
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          caching:
+            enabled: false
+            paths: []
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - stepGroup:
+                  name: semgrep_scan
+                  identifier: semgrep_scan
+                  steps:
+                    - step:
+                        type: GitClone
+                        name: GitClone_1
+                        identifier: GitClone_1
+                        spec:
+                          connectorRef: pranaytodolist
+                          repoName: "<+matrix.jira.split(\":\")[0]>"
+                          cloneDirectory: "/harness/<+matrix.jira.split(\":\")[0]>"
+                          build:
+                            type: branch
+                            spec:
+                              branch: "<+matrix.jira.split(\":\")[1]>"
+                    - step:
+                        type: Semgrep
+                        name: Semgrep_1
+                        identifier: Semgrep_1
+                        spec:
+                          mode: orchestration
+                          config: default
+                          target:
+                            type: repository
+                            workspace: "/harness/<+matrix.jira.split(\":\")[0]>"
+                            detection: manual
+                            name: "<+matrix.jira.split(\":\")[0]>"
+                            variant: "<+matrix.jira.split(\":\")[1]>"
+                          advanced:
+                            log:
+                              level: info
+                  strategy:
+                    matrix:
+                      jira: "<+pipeline.stages.Shell.spec.execution.steps.ShellScript_1.output.outputVariables.myvar.split(',')>"
+                      maxConcurrency: 1
+              - step:
+                  type: Run
+                  name: Run_3
+                  identifier: Run_3
+                  spec:
+                    shell: Sh
+                    command: |-
+                      echo "***********"
+                      pwd
+                      ls -la
+
+                      echo "*************"
+                      pwd
+                      ls ../harness
+
+                      echo "***********"
+
+                      #ls ../harness/drone-cli
+          buildIntelligence:
+            enabled: false
+  identifier: multirepoclone_GS
+  name: multi-repo-clone GS

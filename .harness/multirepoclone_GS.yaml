@@ -126,7 +126,7 @@ pipeline:
 
                       echo "find sarif"
                       ls /tmp
-                      find / -name "results.sarif" 2>/dev/null
+                      find / -name "output.sarif" 2>/dev/null
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

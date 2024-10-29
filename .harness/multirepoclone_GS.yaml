@@ -92,6 +92,8 @@ pipeline:
                           advanced:
                             log:
                               level: info
+                            args:
+                              cli: "--output results.sarif --output-format sarif"
                   strategy:
                     matrix:
                       spec:

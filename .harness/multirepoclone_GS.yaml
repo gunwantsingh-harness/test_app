@@ -24,6 +24,8 @@ pipeline:
                         script: |-
                           echo "harness/drone-cli:master
                           harness/lite-engine:main
+                          harness/global-gateway
+                          harness/ff-gitsync
                           drone/drone-jira:master
                           drone/drone-plugin-index:main" > file.txt
 

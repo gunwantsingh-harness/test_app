@@ -92,8 +92,6 @@ pipeline:
                           advanced:
                             log:
                               level: info
-                            args:
-                              cli: "--output results.sarif --output-format sarif"
                   strategy:
                     matrix:
                       spec:
@@ -127,7 +125,7 @@ pipeline:
                       ls /harness/drone/policy-mgmt
 
                       echo "find sarif"
-
+                      ls /tmp
                       find / -name "results.sarif" 2>/dev/null
           buildIntelligence:
             enabled: false

@@ -107,8 +107,11 @@ pipeline:
                       echo "******* ls / *******"
                       ls
 
-                      echo "******** ls /harness *********"
-                      ls /harness
+                      echo "******** ls /harness/harness *********"
+                      ls /harness/harness
+
+                      echo "******** ls /harness/drone *********"
+                      ls /harness/drone
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

@@ -127,6 +127,42 @@ pipeline:
                       echo "find sarif"
                       ls /tmp
                       find / -name "output.sarif" 2>/dev/null
+              - step:
+                  type: Run
+                  name: Run_2
+                  identifier: Run_2
+                  spec:
+                    shell: Sh
+                    command: |-
+                      #!/bin/bash
+
+                      # CSV Header
+                      echo "Repository,Total Findings,Critical,High,Medium,Low" > sarif_summary.csv
+
+                      # Find all SARIF files from the root and process each
+                      find / -type f -name "output.sarif" 2>/dev/null | while read sarif_file; do
+                          # Extract repository name or folder identifier from the path
+                          repo_path=$(basename "$(dirname "$sarif_file")")
+
+                          # Extract counts for each severity level using jq
+                          total_findings=$(jq '.runs[].results | length' "$sarif_file")
+                          critical=$(jq '[.runs[].results[] | select(.level=="critical")] | length' "$sarif_file")
+                          high=$(jq '[.runs[].results[] | select(.level=="high")] | length' "$sarif_file")
+                          medium=$(jq '[.runs[].results[] | select(.level=="medium")] | length' "$sarif_file")
+                          low=$(jq '[.runs[].results[] | select(.level=="low")] | length' "$sarif_file")
+
+                          # Print summary for each repository
+                          echo "Repository: $repo_path"
+                          echo "Total Findings: $total_findings"
+                          echo "Critical: $critical, High: $high, Medium: $medium, Low: $low"
+                          echo "----------------------------------------"
+
+                          # Append the data to CSV
+                          echo "$repo_path,$total_findings,$critical,$high,$medium,$low" >> sarif_summary.csv
+                      done
+
+                      # Output CSV summary
+                      echo "CSV summary created: sarif_summary.csv"
           buildIntelligence:
             enabled: false
   identifier: multirepoclone_GS

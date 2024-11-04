@@ -64,8 +64,8 @@ pipeline:
                         name: GitClone_Repo
                         identifier: GitClone_Repo
                         spec:
-                          connectorRef: pranaytodolist
-                          repoName: <+matrix.jira.split(":")[0]>
+                          connectorRef: test_GS_apphio
+                          repoName: test_app
                           cloneDirectory: /harness/<+matrix.jira.split(":")[0]>
                           build:
                             type: branch

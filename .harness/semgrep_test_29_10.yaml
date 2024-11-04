@@ -152,7 +152,7 @@ pipeline:
                             ls /harness/<+matrix.jira.split(":")[0]>
                   strategy:
                     matrix:
-                      jira: <+execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
+                      jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
           buildIntelligence:
             enabled: false
         variables:

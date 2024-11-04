@@ -115,7 +115,7 @@ pipeline:
                         spec:
                           connectorRef: pranaytodolist
                           repoName: <+matrix.jira.split(":")[0]>
-                          cloneDirectory: /harness/<+matrix.jira.split(":")[0]>
+                          cloneDirectory: <+matrix.jira.split(":")[0]>
                           build:
                             type: branch
                             spec:

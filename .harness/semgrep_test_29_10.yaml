@@ -158,7 +158,7 @@ pipeline:
           - name: SEMGREP_APP_TOKEN
             type: Secret
             description: ""
-            required: false
+            required: true
             value: gs_semgrep_token
   identifier: semgrep_test_29_10
   name: semgrep_test_29_10

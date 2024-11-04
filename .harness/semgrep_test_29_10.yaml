@@ -20,11 +20,60 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          echo "harness/drone-cli:master
-                          harness/lite-engine:main
-                          drone/drone-jira:master
-                          drone/drone-plugin-index:main" > file.txt
+                          # echo "harness/drone-cli:master
+                          # harness/lite-engine:main
+                          # drone/drone-jira:master
+                          # drone/drone-plugin-index:main" > file.txt
 
+                          echo "chaosnative/chaos-day/chaos-day
+                          drone/policy-mgmt
+                          drone/go-convert
+                          drone/gitness-docs
+                          drone/go-task
+                          drone/go-scm
+                          harness-io/sei-commons
+                          harness-io/demo-dbdevops
+                          harness-io/sei-ingestion-levelops
+                          harness-sto/sto_plugin
+                          harness-sto/harness-pipelines
+                          harness-sto/refid_cache
+                          harness/ff-gitsync
+                          harness/developer-hub
+                          harness/harness-core
+                          harness/harness-core-ui
+                          harness/backstage
+                          harness/canary
+                          harness/harness
+                          harness/account-migration
+                          harness/hce-saas
+                          harness/react-api-client
+                          harness/canary-ui
+                          harness/ccm-worker
+                          harness/harness-dashboards-internal
+                          harness/harness-idp
+                          harness/sto-core
+                          harness/gitX-UI
+                          harness/kubernetes-plugin
+                          harness/runner
+                          levelops/ui-levelops
+                          levelops/api-levelops
+                          levelops/ingestion-levelops
+                          levelops/internal-api-levelops
+                          levelops/commons-levelops
+                          levelops/devops-levelops
+                          wings-software/Automation
+                          wings-software/pipelinesNg-gitsync-testrepo
+                          wings-software/ng-prod-manifests
+                          wings-software/lightwing
+                          wings-software/admin-portal
+                          wings-software/gitops
+                          wings-software/harness-api-performance
+                          wings-software/ff-server
+                          wings-software/PipelinesNgAutomation
+                          wings-software/build-tools-utility
+                          wings-software/ccm-ui
+                          takipi-dev/takipi
+                          takipi-dev/ops" > file.txt
 
                           # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
                           output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")

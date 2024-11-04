@@ -22,19 +22,25 @@ pipeline:
                         script: |-
                           echo "harness/drone-cli:master
                           harness/lite-engine:main
-                          harness/global-gateway:develop
-                          drone/policy-mgmt:main
                           drone/drone-jira:master
                           drone/drone-plugin-index:main" > file.txt
 
-                          # Convert lines to CSV and deduplicate
+
+                          # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
                           output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
+
+                          # # Save the CSV output to a variable
                           csv_contents="$output"
+
+                          # # Print the CSV data
                           echo "$csv_contents"
                     outputVariables:
                       - name: myvar
                         type: String
                         value: csv_contents
+                    executionTarget: {}
+                    environmentVariables: []
+                  timeout: 10m
     - stage:
         name: Clone and Scan Repos
         identifier: clone_and_scan_repos

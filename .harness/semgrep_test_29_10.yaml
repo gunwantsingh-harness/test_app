@@ -99,14 +99,12 @@ pipeline:
                     config: default
                     target:
                       type: repository
-                      detection: manual
-                      name: <+matrix.jira.split(":")[0]>
-                      variant: <+matrix.jira.split(":")[1]>
+                      detection: auto
                     advanced:
                       log:
                         level: info
                     ingestion:
-                      file: /harness/<+matrix.jira.split(":")[0]>
+                      file: <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Scan.spec.detection>
               - step:
                   type: Run
                   name: Print_Repository_Findings
@@ -118,7 +116,6 @@ pipeline:
                       # echo <+matrix.jira.split(":")[0]>
                       # echo <+matrix.jira.split(":")[1]>
                       # echo /harness/<+matrix.jira.split(":")[0]>
-                      echo <+execution.steps.semgrep_scan.steps.Semgrep_Scan.description>
                       echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Scan.spec.detection>
           buildIntelligence:
             enabled: false

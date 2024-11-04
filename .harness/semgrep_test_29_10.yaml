@@ -104,7 +104,7 @@ pipeline:
                       log:
                         level: info
                     ingestion:
-                      file: <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Scan.spec.detection>
+                      file: /harness/<+matrix.jira.split(":")[0]>/semgrep-results.sarif
               - step:
                   type: Run
                   name: Print_Repository_Findings

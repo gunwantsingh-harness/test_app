@@ -88,22 +88,6 @@ pipeline:
                             log:
                               level: info
                     - step:
-                        type: Semgrep
-                        name: Semgrep_Ingestion
-                        identifier: Semgrep_Ingestion
-                        spec:
-                          mode: ingestion
-                          config: default
-                          target:
-                            type: repository
-                            name: <+matrix.jira.split(":")[0]>
-                            variant: <+matrix.jira.split(":")[1]>
-                          advanced:
-                            log:
-                              level: info
-                          ingestion:
-                            file: <+matrix.jira.split(":")[0]>/results.sarif
-                    - step:
                         type: Run
                         name: Run_1
                         identifier: Run_1

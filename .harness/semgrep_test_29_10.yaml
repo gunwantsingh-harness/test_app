@@ -88,6 +88,22 @@ pipeline:
                             log:
                               level: info
                     - step:
+                        type: Semgrep
+                        name: Semgrep_Ingestion
+                        identifier: Semgrep_Ingestion
+                        spec:
+                          mode: ingestion
+                          config: default
+                          target:
+                            type: repository
+                            name: <+matrix.jira.split(":")[0]>
+                            variant: <+matrix.jira.split(":")[1]>
+                          advanced:
+                            log:
+                              level: info
+                          ingestion:
+                            file: /harness/<+matrix.jira.split(":")[0]>/results.sarif
+                    - step:
                         type: Run
                         name: Run_1
                         identifier: Run_1
@@ -97,7 +113,7 @@ pipeline:
                             echo <+matrix.jira.split(":")[0]>
                             echo <+matrix.jira.split(":")[1]>
                             ls /harness/<+matrix.jira.split(":")[0]>
-                            # find /harness -type f -name "*.json" -exec echo {} \;
+                            find /harness -type f -name "*.sarif" -exec echo {} \;
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

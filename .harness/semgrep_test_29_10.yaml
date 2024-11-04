@@ -93,7 +93,10 @@ pipeline:
                         identifier: Run_1
                         spec:
                           shell: Sh
-                          command: echo <+matrix.jira.split(":")[1]>
+                          command: |-
+                            echo <+matrix.jira.split(":")[0]>
+                            echo <+matrix.jira.split(":")[1]>
+                            ls /harness/drone-cli
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

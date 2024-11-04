@@ -97,6 +97,7 @@ pipeline:
                   spec:
                     shell: Sh
                     command: |-
+                      echo "**************************"
                       echo <+matrix.jira.split(":")[0]>
                       echo <+matrix.jira.split(":")[1]>
                       echo /harness/<+matrix.jira.split(":")[0]>

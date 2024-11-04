@@ -136,6 +136,8 @@ pipeline:
                           advanced:
                             log:
                               level: info
+                            args:
+                              cli: "--auth-token <+secrets.getValue(\"piyush-semgrep-pro-token\")>"
                           auth:
                             access_token: <+secrets.getValue("gs_semgrep_token")>
                     - step:

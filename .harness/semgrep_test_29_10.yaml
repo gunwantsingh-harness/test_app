@@ -20,7 +20,6 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          echo "***************"
                           echo "harness/drone-cli:master
                           harness/lite-engine:main
                           drone/drone-jira:master

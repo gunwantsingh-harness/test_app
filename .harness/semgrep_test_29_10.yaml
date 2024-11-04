@@ -20,60 +20,60 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          # echo "harness/drone-cli:master
-                          # harness/lite-engine:main
-                          # drone/drone-jira:master
-                          # drone/drone-plugin-index:main" > file.txt
+                          echo "harness/drone-cli:master
+                          harness/lite-engine:main
+                          drone/drone-jira:master
+                          drone/drone-plugin-index:main" > file.txt
 
-                          echo "chaosnative/chaos-day:main
-                          drone/policy-mgmt:main
-                          drone/go-convert:master
-                          drone/gitness-docs:main
-                          drone/go-task:main
-                          drone/go-scm:master
-                          harness-io/sei-commons:main
-                          harness-io/demo-dbdevops:main
-                          harness-io/sei-ingestion-levelops:main
-                          harness-sto/sto_plugin:develop
-                          harness-sto/harness-pipelines:develop
-                          harness-sto/refid_cache:develop
-                          harness/ff-gitsync:main
-                          harness/developer-hub:main
-                          harness/harness-core:develop
-                          harness/harness-core-ui:develop
-                          harness/backstage:master
-                          harness/canary:main
-                          harness/harness:main
-                          harness/account-migration:main
-                          harness/hce-saas:main
-                          harness/react-api-client:main
-                          harness/canary-ui:main
-                          harness/ccm-worker:main
-                          harness/harness-dashboards-internal:main
-                          harness/harness-idp:main
-                          harness/sto-core:develop
-                          harness/gitX-UI:main
-                          harness/kubernetes-plugin:main
-                          harness/runner:main
-                          levelops/ui-levelops:dev
-                          levelops/api-levelops:main
-                          levelops/ingestion-levelops:main
-                          levelops/internal-api-levelops:main
-                          levelops/commons-levelops:main
-                          levelops/devops-levelops:main
-                          wings-software/Automation:main
-                          wings-software/pipelinesNg-gitsync-testrepo:main
-                          wings-software/ng-prod-manifests:master
-                          wings-software/lightwing:main
-                          wings-software/admin-portal:master
-                          wings-software/gitops:main
-                          wings-software/harness-api-performance:master
-                          wings-software/ff-server:master
-                          wings-software/PipelinesNgAutomation:master
-                          wings-software/build-tools-utility:main
-                          wings-software/ccm-ui:main
-                          takipi-dev/takipi:master
-                          takipi-dev/ops:master" > file.txt
+                          # echo "chaosnative/chaos-day:main
+                          # drone/policy-mgmt:main
+                          # drone/go-convert:master
+                          # drone/gitness-docs:main
+                          # drone/go-task:main
+                          # drone/go-scm:master
+                          # harness-io/sei-commons:main
+                          # harness-io/demo-dbdevops:main
+                          # harness-io/sei-ingestion-levelops:main
+                          # harness-sto/sto_plugin:develop
+                          # harness-sto/harness-pipelines:develop
+                          # harness-sto/refid_cache:develop
+                          # harness/ff-gitsync:main
+                          # harness/developer-hub:main
+                          # harness/harness-core:develop
+                          # harness/harness-core-ui:develop
+                          # harness/backstage:master
+                          # harness/canary:main
+                          # harness/harness:main
+                          # harness/account-migration:main
+                          # harness/hce-saas:main
+                          # harness/react-api-client:main
+                          # harness/canary-ui:main
+                          # harness/ccm-worker:main
+                          # harness/harness-dashboards-internal:main
+                          # harness/harness-idp:main
+                          # harness/sto-core:develop
+                          # harness/gitX-UI:main
+                          # harness/kubernetes-plugin:main
+                          # harness/runner:main
+                          # levelops/ui-levelops:dev
+                          # levelops/api-levelops:main
+                          # levelops/ingestion-levelops:main
+                          # levelops/internal-api-levelops:main
+                          # levelops/commons-levelops:main
+                          # levelops/devops-levelops:main
+                          # wings-software/Automation:main
+                          # wings-software/pipelinesNg-gitsync-testrepo:main
+                          # wings-software/ng-prod-manifests:master
+                          # wings-software/lightwing:main
+                          # wings-software/admin-portal:master
+                          # wings-software/gitops:main
+                          # wings-software/harness-api-performance:master
+                          # wings-software/ff-server:master
+                          # wings-software/PipelinesNgAutomation:master
+                          # wings-software/build-tools-utility:main
+                          # wings-software/ccm-ui:main
+                          # takipi-dev/takipi:master
+                          # takipi-dev/ops:master" > file.txt
 
                           # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
                           output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")

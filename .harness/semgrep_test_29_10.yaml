@@ -137,7 +137,7 @@ pipeline:
                             log:
                               level: info
                           auth:
-                            access_token: <+secrets.getValue("gs_st")>
+                            access_token: <+secrets.getValue("gs_semgrep_token")>
                     - step:
                         type: Run
                         name: Run_1

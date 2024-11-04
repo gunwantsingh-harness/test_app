@@ -137,6 +137,8 @@ pipeline:
                           advanced:
                             log:
                               level: info
+                            args:
+                              cli: "--metrics=off"
                           auth:
                             access_token: <+pipeline.stages.clone_and_scan_repos.variables.SEMGREP_APP_TOKEN>
                     - step:

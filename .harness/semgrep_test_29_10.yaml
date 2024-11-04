@@ -109,6 +109,14 @@ pipeline:
                   identifier: semgrep_scan
                   steps:
                     - step:
+                        type: Run
+                        name: Upgrade Semgrep
+                        identifier: Upgrade_Semgrep
+                        spec:
+                          shell: Bash
+                          command: |
+                            pip install --upgrade semgrep
+                    - step:
                         type: GitClone
                         name: GitClone_Repo
                         identifier: GitClone_Repo

@@ -90,33 +90,6 @@ pipeline:
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
-              - step:
-                  type: Semgrep
-                  name: Semgrep_2
-                  identifier: Semgrep_2
-                  spec:
-                    mode: ingestion
-                    config: default
-                    target:
-                      type: repository
-                      detection: auto
-                    advanced:
-                      log:
-                        level: info
-                    ingestion:
-                      file: /harness/<+matrix.jira.split(":")[0]>/semgrep-results.sarif
-              - step:
-                  type: Run
-                  name: Print_Repository_Findings
-                  identifier: Print_Repository_Findings
-                  spec:
-                    shell: Sh
-                    command: |-
-                      echo "**************************"
-                      # echo <+matrix.jira.split(":")[0]>
-                      # echo <+matrix.jira.split(":")[1]>
-                      # echo /harness/<+matrix.jira.split(":")[0]>
-                      echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Scan.spec.detection>
           buildIntelligence:
             enabled: false
   identifier: semgrep_test_29_10

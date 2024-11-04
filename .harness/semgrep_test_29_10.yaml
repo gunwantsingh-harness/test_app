@@ -98,9 +98,11 @@ pipeline:
                     shell: Sh
                     command: |-
                       echo "**************************"
-                      echo <+matrix.jira.split(":")[0]>
-                      echo <+matrix.jira.split(":")[1]>
-                      echo /harness/<+matrix.jira.split(":")[0]>
+                      # echo <+matrix.jira.split(":")[0]>
+                      # echo <+matrix.jira.split(":")[1]>
+                      # echo /harness/<+matrix.jira.split(":")[0]>
+                      echo <+execution.steps.semgrep_scan.steps.Semgrep_Scan.description>
+                      echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan.steps.Semgrep_Scan.spec.detection>
           buildIntelligence:
             enabled: false
   identifier: semgrep_test_29_10

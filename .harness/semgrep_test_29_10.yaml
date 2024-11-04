@@ -96,7 +96,7 @@ pipeline:
                           command: |-
                             echo <+matrix.jira.split(":")[0]>
                             echo <+matrix.jira.split(":")[1]>
-                            ls
+                            ls harness
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

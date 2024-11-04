@@ -87,19 +87,6 @@ pipeline:
                           advanced:
                             log:
                               level: info
-                          outputVariables:
-                            - name: CRITICAL
-                              type: String
-                              value: <+execution.findings.CRITICAL>
-                            - name: HIGH
-                              type: String
-                              value: <+execution.findings.HIGH>
-                            - name: MEDIUM
-                              type: String
-                              value: <+execution.findings.MEDIUM>
-                            - name: LOW
-                              type: String
-                              value: <+execution.findings.LOW>
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

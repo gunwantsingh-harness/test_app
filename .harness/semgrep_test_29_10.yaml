@@ -149,7 +149,6 @@ pipeline:
                             echo <+matrix.jira.split(":")[0]>
                             echo <+matrix.jira.split(":")[1]>
                             ls /harness/<+matrix.jira.split(":")[0]>
-                            echo "<+pipeline.stages.clone_and_scan_repos.variables.SEMGREP_APP_TOKEN>"
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

@@ -20,6 +20,7 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
+                          echo "***************"
                           echo "harness/drone-cli:master
                           harness/lite-engine:main
                           drone/drone-jira:master
@@ -115,6 +116,8 @@ pipeline:
                         spec:
                           shell: Bash
                           command: |
+                            echo "*************"
+                            <+pipeline.stages.clone_and_scan_repos.variables.SEMGREP_APP_TOKEN>
                             pip install --upgrade semgrep
                     - step:
                         type: GitClone

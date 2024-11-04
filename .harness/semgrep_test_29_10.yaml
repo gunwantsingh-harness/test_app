@@ -102,7 +102,7 @@ pipeline:
                             log:
                               level: info
                           ingestion:
-                            file: /harness/<+matrix.jira.split(":")[0]>/results.sarif
+                            file: <+matrix.jira.split(":")[0]>/results.sarif
                     - step:
                         type: Run
                         name: Run_1

@@ -98,8 +98,8 @@ pipeline:
                     shell: Sh
                     command: |-
                       echo <+matrix.jira.split(":")[0]>
-                      <+matrix.jira.split(":")[1]>
-                      /harness/<+matrix.jira.split(":")[0]>
+                      echo <+matrix.jira.split(":")[1]>
+                      echo /harness/<+matrix.jira.split(":")[0]>
           buildIntelligence:
             enabled: false
   identifier: semgrep_test_29_10

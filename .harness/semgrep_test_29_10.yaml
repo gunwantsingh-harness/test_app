@@ -110,6 +110,6 @@ pipeline:
             type: Secret
             description: ""
             required: false
-            value: semgrepProPiyushToken
+            value: piyush-semgrep-pro-token
   identifier: semgrep_test_29_10
   name: semgrep_test_29_10

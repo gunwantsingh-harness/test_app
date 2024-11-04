@@ -87,8 +87,6 @@ pipeline:
                           advanced:
                             log:
                               level: info
-                          auth:
-                            access_token: <+secrets.getValue("piyush-semgrep-pro-token")>
                     - step:
                         type: Run
                         name: Run_1

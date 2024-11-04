@@ -71,43 +71,42 @@ pipeline:
                             type: branch
                             spec:
                               branch: <+matrix.jira.split(":")[1]>
-                    - parallel:
-                        - step:
-                            type: Semgrep
-                            name: Semgrep_Scan
-                            identifier: Semgrep_Scan
-                            spec:
-                              mode: orchestration
-                              config: default
-                              target:
-                                type: repository
-                                workspace: /harness/<+matrix.jira.split(":")[0]>
-                                detection: manual
-                                name: <+matrix.jira.split(":")[0]>
-                                variant: <+matrix.jira.split(":")[1]>
-                              advanced:
-                                log:
-                                  level: info
-                        - step:
-                            type: Semgrep
-                            name: Semgrep_2
-                            identifier: Semgrep_2
-                            spec:
-                              mode: ingestion
-                              config: default
-                              target:
-                                type: repository
-                                detection: manual
-                                name: <+matrix.jira.split(":")[0]>
-                                variant: <+matrix.jira.split(":")[1]>
-                              advanced:
-                                log:
-                                  level: info
-                              ingestion:
-                                file: /harness/<+matrix.jira.split(":")[0]>
+                    - step:
+                        type: Semgrep
+                        name: Semgrep_Scan
+                        identifier: Semgrep_Scan
+                        spec:
+                          mode: orchestration
+                          config: default
+                          target:
+                            type: repository
+                            workspace: /harness/<+matrix.jira.split(":")[0]>
+                            detection: manual
+                            name: <+matrix.jira.split(":")[0]>
+                            variant: <+matrix.jira.split(":")[1]>
+                          advanced:
+                            log:
+                              level: info
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
+              - step:
+                  type: Semgrep
+                  name: Semgrep_2
+                  identifier: Semgrep_2
+                  spec:
+                    mode: ingestion
+                    config: default
+                    target:
+                      type: repository
+                      detection: manual
+                      name: <+matrix.jira.split(":")[0]>
+                      variant: <+matrix.jira.split(":")[1]>
+                    advanced:
+                      log:
+                        level: info
+                    ingestion:
+                      file: /harness/<+matrix.jira.split(":")[0]>
               - step:
                   type: Run
                   name: Print_Repository_Findings

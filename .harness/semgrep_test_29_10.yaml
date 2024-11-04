@@ -137,7 +137,7 @@ pipeline:
                             log:
                               level: info
                           auth:
-                            access_token: <+secrets.getValue("$SEMGREP_APP_TOKEN")>
+                            access_token: <+pipeline.stages.clone_and_scan_repos.variables.SEMGREP_APP_TOKEN>
                     - step:
                         type: Run
                         name: Run_1

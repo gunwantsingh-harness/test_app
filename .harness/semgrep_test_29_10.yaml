@@ -160,6 +160,6 @@ pipeline:
             type: Secret
             description: ""
             required: true
-            value: SEMGREP_APP_TOKEN
+            value: <+pipeline.stages.clone_and_scan_repos.variables.SEMGREP_APP_TOKEN>
   identifier: semgrep_test_29_10
   name: semgrep_test_29_10

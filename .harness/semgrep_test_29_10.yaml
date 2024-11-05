@@ -154,8 +154,12 @@ pipeline:
                             ls  <+matrix.jira.split(":")[0]>
 
 
-
+                            echo "CRITICAL?"
                             echo <+execution.steps.semgrep_scan.steps.Run_1.output.outputVariables.CRITICAL>
+
+                            echo "TOTAL AND MEDIUM"
+                            echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.TOTAL>
+                            echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.MEDIUM>
                             # echo="<+strategy.identifierPostFix>"
                             # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.CRITICAL>"
                             # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_CRITICAL>"

@@ -136,6 +136,8 @@ pipeline:
                           advanced:
                             log:
                               level: info
+                        envVariables:
+                          SEMGREP_APP_TOKEN: <+stage.variables.SEMGREP_APP_TOKEN>
                     - step:
                         type: Run
                         name: Run_1

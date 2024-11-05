@@ -23,7 +23,7 @@ pipeline:
                           echo "harness/drone-cli:master
                           harness/lite-engine:main
                           drone/drone-jira:master
-                          drone/drone-plugin-index:main" > file.txt
+                          drone/policy-mgmt:main" > file.txt
 
                           # echo "chaosnative/chaos-day:main
                           # drone/policy-mgmt:main

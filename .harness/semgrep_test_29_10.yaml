@@ -149,7 +149,18 @@ pipeline:
                             echo <+matrix.jira.split(":")[1]>
                             ls /harness/<+matrix.jira.split(":")[0]>
                             echo "**********"
+
+
                             ls  <+matrix.jira.split(":")[0]>
+
+
+
+                            echo <+execution.steps.semgrep_scan.steps.Run_1.output.outputVariables.CRITICAL>
+                            # echo="<+strategy.identifierPostFix>"
+                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.CRITICAL>"
+                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_CRITICAL>"
+                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.HIGH>"
+                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_HIGH>"
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

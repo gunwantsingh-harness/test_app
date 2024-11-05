@@ -137,7 +137,7 @@ pipeline:
                             log:
                               level: info
                           auth:
-                            access_token: SEMGREP_APP_TOKEN
+                            access_token: $SEMGREP_APP_TOKEN
                     - step:
                         type: Run
                         name: Run_1

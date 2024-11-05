@@ -136,8 +136,6 @@ pipeline:
                           advanced:
                             log:
                               level: info
-                            args:
-                              cli: "-e SEMGREP_APP_TOKEN=$SEMGREP_APP_TOKEN"
                     - step:
                         type: Run
                         name: Run_1
@@ -155,5 +153,11 @@ pipeline:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
           buildIntelligence:
             enabled: false
+        variables:
+          - name: SEMGREP_APP_TOKEN
+            type: Secret
+            description: ""
+            required: true
+            value: SEMGREP_APP_TOKEN
   identifier: semgrep_test_29_10
   name: semgrep_test_29_10

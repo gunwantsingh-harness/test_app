@@ -136,8 +136,6 @@ pipeline:
                           advanced:
                             log:
                               level: info
-                            args:
-                              cli: "-a $SEMGREP_APP_TOKEN"
                         envVariables:
                           SEMGREP_APP_TOKEN: <+stage.variables.SEMGREP_APP_TOKEN>
                     - step:

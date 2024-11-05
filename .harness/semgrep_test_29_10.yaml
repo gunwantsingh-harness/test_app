@@ -136,6 +136,8 @@ pipeline:
                           advanced:
                             log:
                               level: info
+                          auth:
+                            access_token: <+stage.variables.SEMGREP_APP_TOKEN>
                         envVariables:
                           SEMGREP_APP_TOKEN: <+stage.variables.SEMGREP_APP_TOKEN>
                     - step:

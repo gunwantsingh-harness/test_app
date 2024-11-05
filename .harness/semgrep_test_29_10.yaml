@@ -136,6 +136,8 @@ pipeline:
                           advanced:
                             log:
                               level: info
+                            args:
+                              cli: "-e SEMGREP_APP_TOKEN=$SEMGREP_APP_TOKEN"
                     - step:
                         type: Run
                         name: Run_1

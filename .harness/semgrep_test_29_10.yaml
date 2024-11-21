@@ -122,6 +122,8 @@ pipeline:
                             type: branch
                             spec:
                               branch: <+matrix.jira.split(":")[1]>
+                        when:
+                          stageStatus: All
                     - step:
                         type: Semgrep
                         name: Semgrep_Scan
@@ -139,6 +141,8 @@ pipeline:
                             log:
                               level: debug
                           imageTag: dev
+                        when:
+                          stageStatus: All
                     - step:
                         type: Run
                         name: Run_1
@@ -163,6 +167,8 @@ pipeline:
                             # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_CRITICAL>"
                             # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.HIGH>"
                             # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_HIGH>"
+                        when:
+                          stageStatus: All
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>

@@ -157,10 +157,10 @@ pipeline:
                           command: |-
                             echo <+matrix.jira.split(":")[0]>
                             echo <+matrix.jira.split(":")[1]>
-                            ls /harness/<+matrix.jira.split(":")[0]>
+                            #ls /harness/<+matrix.jira.split(":")[0]>
                             echo "**********"
 
-
+                            pwd
                             ls  <+matrix.jira.split(":")[0]>
 
                             echo "TOTAL AND MEDIUM"

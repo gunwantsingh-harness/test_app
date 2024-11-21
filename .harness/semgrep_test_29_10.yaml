@@ -127,7 +127,7 @@ pipeline:
                         identifier: Semgrep_Scan
                         spec:
                           mode: orchestration
-                          config: default
+                          config: auto-only
                           target:
                             type: repository
                             workspace: <+matrix.jira.split(":")[0]>

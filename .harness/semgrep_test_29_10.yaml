@@ -123,6 +123,13 @@ pipeline:
                             spec:
                               branch: <+matrix.jira.split(":")[1]>
                     - step:
+                        type: Run
+                        name: Run_2
+                        identifier: Run_2
+                        spec:
+                          shell: Sh
+                          command: ls -la
+                    - step:
                         type: Semgrep
                         name: Semgrep_Scan
                         identifier: Semgrep_Scan
@@ -175,5 +182,6 @@ pipeline:
             description: ""
             required: true
             value: SEMGREP_APP_TOKEN
+        description: ""
   identifier: semgrep_test_29_10
   name: semgrep_test_29_10

@@ -130,13 +130,12 @@ pipeline:
                           config: default
                           target:
                             type: repository
-                            workspace: <+matrix.jira.split(":")[0]>
                             detection: manual
                             name: <+matrix.jira.split(":")[0]>
                             variant: <+matrix.jira.split(":")[1]>
                           advanced:
                             log:
-                              level: info
+                              level: debug
                           auth:
                             access_token: <+secrets.getValue("SEMGREP_APP_TOKEN")>
                     - step:

@@ -22,6 +22,7 @@ pipeline:
                         script: |-
                           echo "harness/drone-cli:master
                           drone/policy-mgmt:main" > file.txt
+                          ls -la
                           # harness/lite-engine:main
                           # drone/drone-jira:master
 

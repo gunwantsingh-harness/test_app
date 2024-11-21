@@ -123,13 +123,6 @@ pipeline:
                             spec:
                               branch: <+matrix.jira.split(":")[1]>
                     - step:
-                        type: Run
-                        name: Run_2
-                        identifier: Run_2
-                        spec:
-                          shell: Sh
-                          command: ls -la
-                    - step:
                         type: Semgrep
                         name: Semgrep_Scan
                         identifier: Semgrep_Scan
@@ -161,6 +154,7 @@ pipeline:
                             echo "**********"
 
                             pwd
+                            echo "listing  content"
                             ls  <+matrix.jira.split(":")[0]>
 
                             echo "TOTAL AND MEDIUM"

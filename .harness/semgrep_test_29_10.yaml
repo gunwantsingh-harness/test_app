@@ -137,6 +137,7 @@ pipeline:
                           advanced:
                             log:
                               level: debug
+                          imageTag: dev
                           auth:
                             access_token: <+secrets.getValue("SEMGREP_APP_TOKEN")>
                     - step:

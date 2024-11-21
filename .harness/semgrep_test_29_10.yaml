@@ -181,6 +181,9 @@ pipeline:
                     advanced:
                       log:
                         level: info
+                    imageTag: dev
+                  when:
+                    stageStatus: All
           buildIntelligence:
             enabled: false
         variables:

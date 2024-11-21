@@ -166,6 +166,21 @@ pipeline:
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
+              - step:
+                  type: Semgrep
+                  name: Semgrep_2
+                  identifier: Semgrep_2
+                  spec:
+                    mode: orchestration
+                    config: default
+                    target:
+                      type: repository
+                      detection: manual
+                      name: tusharnankani/ToDoList
+                      variant: master
+                    advanced:
+                      log:
+                        level: info
           buildIntelligence:
             enabled: false
         variables:

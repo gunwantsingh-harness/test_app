@@ -179,9 +179,10 @@ pipeline:
                               config: default
                               target:
                                 type: repository
+                                workspace: <+matrix.jira.split(":")[0]>
                                 detection: manual
-                                name: tusharnankani/ToDoList
-                                variant: master
+                                name: <+matrix.jira.split(":")[0]>
+                                variant: <+matrix.jira.split(":")[1]>
                               advanced:
                                 log:
                                   level: info

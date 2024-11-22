@@ -141,7 +141,7 @@ pipeline:
                             log:
                               level: info
                           auth:
-                            access_token: 5d6c3085ec72aaa4f86dece61ad4e06160b76521ad6766edea3e2ec9d1bf8ef4
+                            access_token: <+secrets.getValue("semgrep-pro-secret-piyushk")>
                         when:
                           stageStatus: All
                     - step:

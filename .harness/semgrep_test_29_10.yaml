@@ -20,7 +20,7 @@ pipeline:
                       type: Inline
                       spec:
                         script: |-
-                          echo "harness/drone-cli:master" > file.txt
+                          echo "tusharnankani/ToDoList:master" > file.txt
                           ls -la
                           # harness/lite-engine:main
                           # drone/drone-jira:master

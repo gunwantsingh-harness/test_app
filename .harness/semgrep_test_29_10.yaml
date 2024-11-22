@@ -140,6 +140,8 @@ pipeline:
                           advanced:
                             log:
                               level: debug
+                          auth:
+                            access_token: <+secrets.getValue("piyush-semgrep-pro-token")>
                         when:
                           stageStatus: All
                     - step:

@@ -140,7 +140,6 @@ pipeline:
                           advanced:
                             log:
                               level: debug
-                          imageTag: dev
                         when:
                           stageStatus: All
                     - step:
@@ -187,7 +186,6 @@ pipeline:
                     advanced:
                       log:
                         level: info
-                    imageTag: dev
                   when:
                     stageStatus: All
           buildIntelligence:

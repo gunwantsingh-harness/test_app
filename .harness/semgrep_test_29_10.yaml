@@ -140,7 +140,7 @@ pipeline:
                             log:
                               level: info
                           auth:
-                            access_token: <+secrets.getValue("piyush-semgrep-pro-token")>
+                            access_token: <+secrets.getValue("semgrep-pro-secret-piyushk")>
                         when:
                           stageStatus: All
                     - parallel:

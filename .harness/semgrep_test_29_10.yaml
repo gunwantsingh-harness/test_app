@@ -186,8 +186,6 @@ pipeline:
                               advanced:
                                 log:
                                   level: info
-                              auth:
-                                access_token: <+secrets.getValue("SEMGREP_APP_TOKEN")>
                             when:
                               stageStatus: All
                   strategy:

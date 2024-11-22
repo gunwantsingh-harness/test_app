@@ -139,9 +139,9 @@ pipeline:
                             variant: <+matrix.jira.split(":")[1]>
                           advanced:
                             log:
-                              level: debug
+                              level: info
                           auth:
-                            access_token: <+secrets.getValue("piyush-semgrep-pro-token")>
+                            access_token: 5d6c3085ec72aaa4f86dece61ad4e06160b76521ad6766edea3e2ec9d1bf8ef4
                         when:
                           stageStatus: All
                     - step:

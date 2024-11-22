@@ -144,54 +144,55 @@ pipeline:
                             access_token: <+secrets.getValue("piyush-semgrep-pro-token")>
                         when:
                           stageStatus: All
-                    - step:
-                        type: Run
-                        name: Run_1
-                        identifier: Run_1
-                        spec:
-                          shell: Sh
-                          command: |-
-                            echo <+matrix.jira.split(":")[0]>
-                            echo <+matrix.jira.split(":")[1]>
-                            #ls /harness/<+matrix.jira.split(":")[0]>
-                            echo "**********"
+                    - parallel:
+                        - step:
+                            type: Run
+                            name: Run_1
+                            identifier: Run_1
+                            spec:
+                              shell: Sh
+                              command: |-
+                                echo <+matrix.jira.split(":")[0]>
+                                echo <+matrix.jira.split(":")[1]>
+                                #ls /harness/<+matrix.jira.split(":")[0]>
+                                echo "**********"
 
-                            pwd
-                            echo "listing  content"
-                            ls  <+matrix.jira.split(":")[0]>
+                                pwd
+                                echo "listing  content"
+                                ls  <+matrix.jira.split(":")[0]>
 
-                            echo "TOTAL AND MEDIUM"
-                            echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.TOTAL>
-                            echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.MEDIUM>
-                            # echo="<+strategy.identifierPostFix>"
-                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.CRITICAL>"
-                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_CRITICAL>"
-                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.HIGH>"
-                            # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_HIGH>"
-                        when:
-                          stageStatus: All
+                                echo "TOTAL AND MEDIUM"
+                                echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.TOTAL>
+                                echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.MEDIUM>
+                                # echo="<+strategy.identifierPostFix>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.CRITICAL>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_CRITICAL>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.HIGH>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_HIGH>"
+                            when:
+                              stageStatus: All
+                        - step:
+                            type: Semgrep
+                            name: Semgrep_2
+                            identifier: Semgrep_2
+                            spec:
+                              mode: orchestration
+                              config: default
+                              target:
+                                type: repository
+                                detection: manual
+                                name: tusharnankani/ToDoList
+                                variant: master
+                              advanced:
+                                log:
+                                  level: info
+                              auth:
+                                access_token: <+secrets.getValue("SEMGREP_APP_TOKEN")>
+                            when:
+                              stageStatus: All
                   strategy:
                     matrix:
                       jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
-              - step:
-                  type: Semgrep
-                  name: Semgrep_2
-                  identifier: Semgrep_2
-                  spec:
-                    mode: orchestration
-                    config: default
-                    target:
-                      type: repository
-                      detection: manual
-                      name: tusharnankani/ToDoList
-                      variant: master
-                    advanced:
-                      log:
-                        level: info
-                    auth:
-                      access_token: <+secrets.getValue("SEMGREP_APP_TOKEN")>
-                  when:
-                    stageStatus: All
           buildIntelligence:
             enabled: false
         variables:

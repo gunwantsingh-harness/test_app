@@ -1,0 +1,7 @@
+# orgs_repos.txt
+# Organization: Repositories (comma-separated)
+
+# harness: ff-proxy, lite-engine
+drone: drone-jira, drone-plugin-index
+takipi: takipi-storage
+

@@ -1,0 +1,204 @@
+pipeline:
+  projectIdentifier: Security_Test_Scans
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Shell
+        identifier: Shell
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: Define_Repositories
+                  identifier: Define_Repositories
+                  spec:
+                    shell: Bash
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          echo "harness/uicore:main" > file.txt
+                          ls -la
+                          # harness/lite-engine:main
+                          # drone/drone-jira:master
+
+
+                          # echo "chaosnative/chaos-day:main
+                          # drone/policy-mgmt:main
+                          # drone/go-convert:master
+                          # drone/gitness-docs:main
+                          # drone/go-task:main
+                          # drone/go-scm:master
+                          # harness-io/sei-commons:main
+                          # harness-io/demo-dbdevops:main
+                          # harness-io/sei-ingestion-levelops:main
+                          # harness-sto/sto_plugin:develop
+                          # harness-sto/harness-pipelines:develop
+                          # harness-sto/refid_cache:develop
+                          # harness/ff-gitsync:main
+                          # harness/developer-hub:main
+                          # harness/harness-core:develop
+                          # harness/harness-core-ui:develop
+                          # harness/backstage:master
+                          # harness/canary:main
+                          # harness/harness:main
+                          # harness/account-migration:main
+                          # harness/hce-saas:main
+                          # harness/react-api-client:main
+                          # harness/canary-ui:main
+                          # harness/ccm-worker:main
+                          # harness/harness-dashboards-internal:main
+                          # harness/harness-idp:main
+                          # harness/sto-core:develop
+                          # harness/gitX-UI:main
+                          # harness/kubernetes-plugin:main
+                          # harness/runner:main
+                          # levelops/ui-levelops:dev
+                          # levelops/api-levelops:main
+                          # levelops/ingestion-levelops:main
+                          # levelops/internal-api-levelops:main
+                          # levelops/commons-levelops:main
+                          # levelops/devops-levelops:main
+                          # wings-software/Automation:main
+                          # wings-software/pipelinesNg-gitsync-testrepo:main
+                          # wings-software/ng-prod-manifests:master
+                          # wings-software/lightwing:main
+                          # wings-software/admin-portal:master
+                          # wings-software/gitops:main
+                          # wings-software/harness-api-performance:master
+                          # wings-software/ff-server:master
+                          # wings-software/PipelinesNgAutomation:master
+                          # wings-software/build-tools-utility:main
+                          # wings-software/ccm-ui:main
+                          # takipi-dev/takipi:master
+                          # takipi-dev/ops:master" > file.txt
+
+                          # Read the lines from file.txt, convert to comma-separated CSV, and dedupe
+                          output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
+
+                          # # Save the CSV output to a variable
+                          csv_contents="$output"
+
+                          # # Print the CSV data
+                          echo "$csv_contents"
+                    outputVariables:
+                      - name: myvar
+                        type: String
+                        value: csv_contents
+                    executionTarget: {}
+                    environmentVariables: []
+                  timeout: 10m
+    - stage:
+        name: Clone and Scan Repos
+        identifier: clone_and_scan_repos
+        type: CI
+        spec:
+          cloneCodebase: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - stepGroup:
+                  name: semgrep_scan
+                  identifier: semgrep_scan
+                  steps:
+                    - step:
+                        type: GitClone
+                        name: GitClone_Repo
+                        identifier: GitClone_Repo
+                        spec:
+                          connectorRef: pranaytodolist
+                          repoName: <+matrix.jira.split(":")[0]>
+                          cloneDirectory: <+matrix.jira.split(":")[0]>
+                          build:
+                            type: branch
+                            spec:
+                              branch: <+matrix.jira.split(":")[1]>
+                        when:
+                          stageStatus: All
+                    - step:
+                        type: Semgrep
+                        name: Semgrep_Scan
+                        identifier: Semgrep_Scan
+                        spec:
+                          mode: orchestration
+                          config: default
+                          target:
+                            type: repository
+                            workspace: <+matrix.jira.split(":")[0]>
+                            detection: manual
+                            name: <+matrix.jira.split(":")[0]>
+                            variant: <+matrix.jira.split(":")[1]>
+                          advanced:
+                            log:
+                              level: debug
+                          auth:
+                            access_token: <+secrets.getValue("semgrep-pro-secret-piyushk")>
+                        when:
+                          stageStatus: All
+                    - parallel:
+                        - step:
+                            type: Run
+                            name: Run_1
+                            identifier: Run_1
+                            spec:
+                              shell: Sh
+                              command: |-
+                                echo <+matrix.jira.split(":")[0]>
+                                echo <+matrix.jira.split(":")[1]>
+                                #ls /harness/<+matrix.jira.split(":")[0]>
+                                echo "**********"
+
+                                pwd
+                                echo "listing  content"
+                                ls  <+matrix.jira.split(":")[0]>
+
+                                echo "TOTAL AND MEDIUM"
+                                echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.TOTAL>
+                                echo <+pipeline.stages.clone_and_scan_repos.spec.execution.steps.semgrep_scan_harness_drone_cli_master.steps.Semgrep_Scan.output.outputVariables.MEDIUM>
+                                # echo="<+strategy.identifierPostFix>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.CRITICAL>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_CRITICAL>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.HIGH>"
+                                # echo="<+pipeline.stages.pull_image.spec.execution.steps.scan<+strategy.identifierPostFix>.steps.PrismaCloud_1.output.outputVariables.NEW_HIGH>"
+                            when:
+                              stageStatus: All
+                        - step:
+                            type: Semgrep
+                            name: Semgrep_2
+                            identifier: Semgrep_2
+                            spec:
+                              mode: orchestration
+                              config: default
+                              target:
+                                type: repository
+                                workspace: <+matrix.jira.split(":")[0]>
+                                detection: manual
+                                name: <+matrix.jira.split(":")[0]>
+                                variant: <+matrix.jira.split(":")[1]>
+                              advanced:
+                                log:
+                                  level: debug
+                            when:
+                              stageStatus: All
+                  strategy:
+                    matrix:
+                      jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
+          buildIntelligence:
+            enabled: false
+        variables:
+          - name: SEMGREP_APP_TOKEN
+            type: Secret
+            description: ""
+            required: true
+            value: SEMGREP_APP_TOKEN
+        description: ""
+  identifier: semgrep_test_29_10
+  name: semgrep_test_29_10

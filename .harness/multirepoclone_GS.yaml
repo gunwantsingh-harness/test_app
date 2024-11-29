@@ -1,0 +1,272 @@
+pipeline:
+  projectIdentifier: Security_Test_Scans
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Shell
+        identifier: Shell
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: Define_Repositories
+                  identifier: Define_Repositories
+                  spec:
+                    shell: Bash
+                    executionTarget: {}
+                    source:
+                      type: Inline
+                      spec:
+                        script: |-
+                          echo "harness/drone-cli:master
+                          harness/lite-engine:main
+                          harness/global-gateway:develop
+                          drone/policy-mgmt:main
+                          drone/drone-jira:master
+                          drone/drone-plugin-index:main" > file.txt
+
+                          # Read lines from file.txt, convert to CSV, and remove duplicates
+                          output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
+
+                          # Save CSV output to a variable
+                          csv_contents="$output"
+                          echo "$csv_contents"
+                    environmentVariables: []
+                    outputVariables:
+                      - name: myvar
+                        type: String
+                        value: csv_contents
+                  timeout: 10m
+        tags: {}
+    - stage:
+        name: clone repos
+        identifier: clone_repos
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          caching:
+            enabled: false
+            paths: []
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - stepGroup:
+                  name: semgrep_scan
+                  identifier: semgrep_scan
+                  steps:
+                    - step:
+                        type: GitClone
+                        name: GitClone_1
+                        identifier: GitClone_1
+                        spec:
+                          connectorRef: pranaytodolist
+                          repoName: <+matrix.jira.split(":")[0]>
+                          cloneDirectory: /harness/<+matrix.jira.split(":")[0]>
+                          build:
+                            type: branch
+                            spec:
+                              branch: <+matrix.jira.split(":")[1]>
+                    - step:
+                        type: Semgrep
+                        name: Semgrep_Ingestion
+                        identifier: Semgrep_Ingestion
+                        spec:
+                          mode: orchestration
+                          config: default
+                          target:
+                            type: repository
+                            workspace: /harness/<+matrix.jira.split(":")[0]>
+                            detection: manual
+                            name: <+matrix.jira.split(":")[0]>
+                            variant: <+matrix.jira.split(":")[1]>
+                          advanced:
+                            log:
+                              level: info
+                  strategy:
+                    matrix:
+                      spec:
+                        maxConcurrency: 1
+                      jira: <+pipeline.stages.Shell.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
+              - step:
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
+                  spec:
+                    shell: Sh
+                    command: |-
+                      echo "******* ls / *******"
+                      ls
+
+                      echo "******** ls /harness/harness *********"
+                      ls /harness/harness
+
+                      echo "******** ls /harness/drone *********"
+                      ls /harness/drone
+
+
+                      echo "******** ls /harness/drone/drone-jira *********"
+                      ls /harness/drone/drone-jira
+
+                      echo "******** ls /harness/drone/drone-plugin-index *********"
+                      ls /harness/drone/drone-plugin-index
+
+
+                      echo "******** ls /harness/drone/policy-mgmt *********"
+                      ls /harness/drone/policy-mgmt
+
+                      echo "find sarif"
+                      ls /tmp
+                      find / -name "output.sarif" 2>/dev/null
+              - step:
+                  type: Run
+                  name: Run_2
+                  identifier: Run_2
+                  spec:
+                    shell: Sh
+                    command: |-
+                      pipeline:
+                        projectIdentifier: Security_Test_Scans
+                        orgIdentifier: default
+                        tags: {}
+                        stages:
+                          - stage:
+                              name: Define_Repositories
+                              identifier: Define_Repositories
+                              description: ""
+                              type: Custom
+                              spec:
+                                execution:
+                                  steps:
+                                    - step:
+                                        type: ShellScript
+                                        name: Define_Repositories
+                                        identifier: Define_Repositories
+                                        spec:
+                                          shell: Bash
+                                          executionTarget: {}
+                                          source:
+                                            type: Inline
+                                            spec:
+                                              script: |-
+                                                echo "harness/drone-cli:master
+                                                harness/lite-engine:main
+                                                harness/global-gateway:develop
+                                                drone/policy-mgmt:main
+                                                drone/drone-jira:master
+                                                drone/drone-plugin-index:main" > file.txt
+
+                                                # Read lines from file.txt, convert to CSV, and remove duplicates
+                                                output=$(awk '!seen[$0]++' file.txt | paste -s -d ",")
+
+                                                # Save CSV output to a variable
+                                                csv_contents="$output"
+                                                echo "$csv_contents"
+                                          environmentVariables: []
+                                          outputVariables:
+                                            - name: myvar
+                                              type: String
+                                              value: csv_contents
+                                        timeout: 10m
+                              tags: {}
+
+                          - stage:
+                              name: Clone_And_Scan
+                              identifier: Clone_And_Scan
+                              description: ""
+                              type: CI
+                              spec:
+                                cloneCodebase: false
+                                caching:
+                                  enabled: false
+                                  paths: []
+                                platform:
+                                  os: Linux
+                                  arch: Amd64
+                                runtime:
+                                  type: Cloud
+                                  spec: {}
+                                execution:
+                                  steps:
+                                    - stepGroup:
+                                        name: Semgrep_Scan_Group
+                                        identifier: Semgrep_Scan_Group
+                                        steps:
+                                          - step:
+                                              type: GitClone
+                                              name: GitClone
+                                              identifier: GitClone
+                                              spec:
+                                                connectorRef: pranaytodolist
+                                                repoName: <+matrix.jira.split(":")[0]>
+                                                cloneDirectory: /harness/<+matrix.jira.split(":")[0]>
+                                                build:
+                                                  type: branch
+                                                  spec:
+                                                    branch: <+matrix.jira.split(":")[1]>
+                                          - step:
+                                              type: Semgrep
+                                              name: Semgrep_Ingestion
+                                              identifier: Semgrep_Ingestion
+                                              spec:
+                                                mode: orchestration
+                                                config: default
+                                                target:
+                                                  type: repository
+                                                  workspace: /harness/<+matrix.jira.split(":")[0]>
+                                                  detection: manual
+                                                  name: <+matrix.jira.split(":")[0]>
+                                                  variant: <+matrix.jira.split(":")[1]>
+                                                advanced:
+                                                  log:
+                                                    level: info
+                                        strategy:
+                                          matrix:
+                                            jira: <+pipeline.stages.Define_Repositories.spec.execution.steps.Define_Repositories.output.outputVariables.myvar.split(',')>
+                                            maxConcurrency: 1
+                                    - step:
+                                        type: Run
+                                        name: Collect_Findings
+                                        identifier: Collect_Findings
+                                        spec:
+                                          shell: Sh
+                                          command: |-
+                                            echo "Finding all SARIF files and summarizing findings..."
+
+                                            # Initialize arrays to store findings by repository
+                                            declare -A repo_findings
+
+                                            # Locate all SARIF files and summarize
+                                            find /harness -name "*.sarif" | while read -r sarif_file; do
+                                              repo_name=$(basename $(dirname "$sarif_file"))
+                                              branch_name=$(jq -r '.runs[0].tool.driver.variant' "$sarif_file")
+                                              total_findings=$(jq '.runs[].results | length' "$sarif_file")
+                                              critical=$(jq '[.runs[].results[].properties.severity | select(. == "critical")] | length' "$sarif_file")
+                                              high=$(jq '[.runs[].results[].properties.severity | select(. == "high")] | length' "$sarif_file")
+                                              medium=$(jq '[.runs[].results[].properties.severity | select(. == "medium")] | length' "$sarif_file")
+                                              low=$(jq '[.runs[].results[].properties.severity | select(. == "low")] | length' "$sarif_file")
+                                              repo_findings["$repo_name:$branch_name"]="Total: $total_findings, Critical: $critical, High: $high, Medium: $medium, Low: $low"
+                                            done
+
+                                            # Display summary per repository
+                                            echo "Final Scan Summary:"
+                                            for repo in "${!repo_findings[@]}"; do
+                                              echo "Repository: $repo - Findings Summary: ${repo_findings[$repo]}"
+                                            done
+                                buildIntelligence:
+                                  enabled: false
+                        identifier: Semgrep_Pipeline
+                        name: Semgrep Security Test Pipeline
+          buildIntelligence:
+            enabled: false
+  identifier: multirepoclone_GS
+  name: multi-repo-clone GS

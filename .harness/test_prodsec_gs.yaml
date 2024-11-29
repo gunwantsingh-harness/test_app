@@ -1,0 +1,92 @@
+pipeline:
+  name: test_prodsec_gs
+  identifier: test_prodsec_gs
+  projectIdentifier: Security_Test_Scans
+  orgIdentifier: default
+  variables:
+    - name: SKIP_TESTS
+      type: String
+      value: "true"
+  tags: {}
+  stages:
+    - stage:
+        name: Semgrep Scan - Multiple repos
+        identifier: Semgrep_Scan_Multiple_repos
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: Clone Repos
+                  identifier: Install_and_Scan
+                  type: ShellScript
+                  strategy:
+                    matrix:
+                      maxConcurrency: 2
+                      organization:
+                        - name: drone
+                          repositories: drone-jira
+                        - name: takipi
+                          repositories: takipi-storage
+                  spec:
+                    shell: Bash
+                    source:
+                      type: Inline
+                      spec:
+                        script: |
+                          echo "Processing organization: <+matrix.organization.name>"
+
+                          # Step 2: Split the space-separated repositories string into an array
+                          IFS=' ' read -r -a repos_array <<< "<+matrix.organization.repositories>"
+
+                          # Step 3: Loop over the repositories within the organization
+                          for repo in "${repos_array[@]}"; do
+                            echo "Cloning and scanning repository: <+matrix.organization.name>/${repo}"
+
+                            git clone https://github.com/<+matrix.organization.name>/${repo}.git
+                            if [ $? -ne 0 ]; then
+                                echo "Failed to clone repository <+matrix.organization.name>/${repo}. Skipping."
+                                continue
+                            fi
+
+                            cd ${repo} || exit 1
+
+                            # Fetch the default branch
+                            default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+                            echo "Default branch for ${repo} is ${default_branch}"
+
+                            git checkout $default_branch
+
+                            # List the contents of the cloned repository
+                            echo "Contents of the cloned repository <+matrix.organization.name>/${repo}:"
+                            ls -al
+
+                            # Cleanup
+                            cd ..
+                            rm -rf ${repo}
+                          done
+                    failureStrategies:
+                      - onFailure:
+                          errors:
+                            - AllErrors
+                          action:
+                            type: MarkAsFailure
+                    executionTarget: {}
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: MarkAsFailure
+        tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: test_GS_apphio
+        repoName: test_app
+        build: <+input>
+        sparseCheckout: []
